@@ -1,4 +1,6 @@
 defmodule Grabakey.WebServer do
+  @headers %{"content-type" => "text/plain"}
+
   @doc """
   see https://ninenines.eu/docs/en/cowboy/2.6/manual/
 
@@ -13,13 +15,20 @@ defmodule Grabakey.WebServer do
       :cowboy_router.compile([
         {:_,
          [
-           {'/fs/:path', __MODULE__, :state}
+           {'/api/ping', __MODULE__, :ping},
+           {'/api/users', Grabakey.UserApi, :new},
+           {'/api/users/:id', Grabakey.UserApi, :id}
          ]}
       ])
 
     trans_opts = [port: port]
     proto_opts = %{env: %{dispatch: dispatch}}
     :cowboy.start_clear(name, trans_opts, proto_opts)
+  end
+
+  def init(req, :ping = state) do
+    req = :cowboy_req.reply(200, @headers, "pong", req)
+    {:ok, req, state}
   end
 
   @doc """
@@ -34,20 +43,6 @@ defmodule Grabakey.WebServer do
   """
   def get_port(name \\ __MODULE__) do
     :ranch.get_port(name)
-  end
-
-  def init(req, state) do
-    path = :cowboy_req.binding(:path, req)
-
-    req =
-      :cowboy_req.reply(
-        200,
-        %{"content-type" => "text/plain"},
-        "/fs/#{path}",
-        req
-      )
-
-    {:ok, req, state}
   end
 
   def terminate(_reason, _partial_req, _state) do
