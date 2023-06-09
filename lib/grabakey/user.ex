@@ -8,7 +8,6 @@ defmodule Grabakey.User do
     field(:email, :string)
     field(:pubkey, :string)
     field(:token, :string)
-    field(:verified, :boolean, default: false)
 
     timestamps(type: :utc_datetime_usec)
   end
@@ -16,8 +15,8 @@ defmodule Grabakey.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:email, :pubkey, :token, :verified])
-    |> validate_required([:email, :pubkey, :token, :verified])
+    |> cast(attrs, [:email, :pubkey, :token])
+    |> validate_required([:email, :pubkey, :token])
     |> validate_format(:email, ~r/@/)
     |> validate_format(:email, ~r/^\S+$/)
     |> unique_constraint(:email)

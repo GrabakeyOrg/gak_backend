@@ -1,6 +1,4 @@
 defmodule Grabakey.WebServer do
-  @headers %{"content-type" => "text/plain"}
-
   @doc """
   see https://ninenines.eu/docs/en/cowboy/2.6/manual/
 
@@ -9,7 +7,6 @@ defmodule Grabakey.WebServer do
   def start_link(opts \\ []) do
     # name can be any erlang term
     port = Keyword.get(opts, :port, 0)
-    delay = Keyword.get(opts, :delay, 0)
     name = Keyword.get(opts, :name, __MODULE__)
 
     dispatch =
@@ -17,7 +14,7 @@ defmodule Grabakey.WebServer do
         {:_,
          [
            {'/api/ping', __MODULE__, :ping},
-           {'/api/users', Grabakey.UserApi, {:new, delay}},
+           {'/api/users', Grabakey.UserApi, :new},
            {'/api/users/:id', Grabakey.UserApi, :id}
          ]}
       ])
@@ -28,7 +25,8 @@ defmodule Grabakey.WebServer do
   end
 
   def init(req, :ping = state) do
-    req = :cowboy_req.reply(200, @headers, "pong", req)
+    headers = %{"content-type" => "text/plain"}
+    req = :cowboy_req.reply(200, headers, "pong", req)
     {:ok, req, state}
   end
 

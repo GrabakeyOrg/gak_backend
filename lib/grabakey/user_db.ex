@@ -10,11 +10,27 @@ defmodule Grabakey.UserDb do
     |> Repo.insert(conflict_target: :email, on_conflict: {:replace, [:token, :updated_at]})
   end
 
+  def update_pubkey(user, pubkey) do
+    token = Ecto.ULID.generate()
+
+    user
+    |> User.changeset(%{token: token, pubkey: pubkey})
+    |> Repo.update()
+  end
+
   def find_by_id(id) do
     Repo.get_by(User, id: id)
   end
 
   def find_by_email(email) do
     Repo.get_by(User, email: email)
+  end
+
+  def find_by_id_and_token(id, token) do
+    Repo.get_by(User, id: id, token: token)
+  end
+
+  def delete(user) do
+    Repo.delete(user)
   end
 end

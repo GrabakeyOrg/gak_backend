@@ -2,31 +2,38 @@
 
 MVP
 
-- phoenix + sqlite
+- cowboy + sqlite
 - single key per-user
 - email authentication
 - curl as client
 - ed25519 only
 - AuthorizedKeysCommand plugin
-- User: id (uuid), email, pubkey, verified (email), token
+- User: id (uuid), email, pubkey, token
 
 Use Cases
 
 - Create user: 
   - email -> id=new, token=new and send to email 
-  - new 5m token created and sent every time
-- Verify email: email + token -> verified=true 
-- Update pubkey: id + pubkey + token -> pubkey=updated
+  - new token created and sent every time
+- Update pubkey: id + pubkey + token -> pubkey=updated, token=new
 - Install sshd plugin
 - Purge cron
-  - Unused tokens
+  - Account with default pubkey after N hours
 
 API
 
 - POST /api/users <- email -> id+token
-- GET /api/users/:id -> pubkey
-- PUT /api/users/:id <- token+pubkey
 - DELETE /api/users/:id <- token
+- PUT /api/users/:id <- token+pubkey
+- GET /api/users/:id -> pubkey
+
+## Todo
+
+- App supervisor
+- Email curl samples
+- Purge cron job
+- AWS release
+- DOS delay
 
 ## Howto
 

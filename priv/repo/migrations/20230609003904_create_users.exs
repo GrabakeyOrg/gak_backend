@@ -7,7 +7,6 @@ defmodule Grabakey.Repo.Migrations.CreateUsers do
       add(:email, :string)
       add(:pubkey, :string)
       add(:token, :string)
-      add(:verified, :boolean, default: false, null: false)
 
       timestamps()
     end

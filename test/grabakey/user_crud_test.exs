@@ -1,37 +1,32 @@
 defmodule Grabakey.UserCrudTest do
   use Grabakey.DataCase, async: false
 
-  @empty %{email: nil, verified: false, pubkey: "PUBKEY", token: "TOKEN"}
+  @empty %{email: nil, pubkey: "PUBKEY", token: "TOKEN"}
 
   test "user crud test" do
     user = User.changeset(%User{}, %{@empty | email: "test@grabakey.org"})
     assert {:ok, %User{} = user} = Repo.insert(user)
     assert 26 == String.length(user.id)
     assert user.email == "test@grabakey.org"
-    assert user.verified == false
     assert user.pubkey == "PUBKEY"
     assert user.token == "TOKEN"
     assert [%User{} = user] = Repo.all(User)
     assert 26 == String.length(user.id)
     assert user.email == "test@grabakey.org"
-    assert user.verified == false
     assert user.pubkey == "PUBKEY"
     assert user.token == "TOKEN"
     assert user = Repo.get(User, user.id)
     assert 26 == String.length(user.id)
     assert user.email == "test@grabakey.org"
-    assert user.verified == false
     assert user.pubkey == "PUBKEY"
     assert user.token == "TOKEN"
     assert user = Repo.get_by(User, id: user.id)
     assert 26 == String.length(user.id)
     assert user.email == "test@grabakey.org"
-    assert user.verified == false
     assert user.pubkey == "PUBKEY"
     assert user.token == "TOKEN"
     assert user = Repo.get_by(User, email: user.email)
     assert 26 == String.length(user.id)
-    assert user.verified == false
     assert user.pubkey == "PUBKEY"
     assert user.token == "TOKEN"
   end
@@ -41,7 +36,6 @@ defmodule Grabakey.UserCrudTest do
     assert {:ok, %User{} = user} = Repo.insert(changeset)
     assert 26 == String.length(user.id)
     assert user.email == "test@grabakey.org"
-    assert user.verified == false
     assert user.pubkey == "PUBKEY"
     assert user.token == "TOKEN"
     changeset = User.changeset(user, %{})
@@ -59,7 +53,6 @@ defmodule Grabakey.UserCrudTest do
     assert {:ok, %User{} = user} = Repo.insert(changeset)
     assert 26 == String.length(user.id)
     assert user.email == "test@grabakey.org"
-    assert user.verified == false
     assert user.pubkey == "PUBKEY"
     assert user.token == "TOKEN"
     Repo.delete_all(User)

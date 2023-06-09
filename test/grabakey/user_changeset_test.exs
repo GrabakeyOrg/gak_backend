@@ -1,7 +1,7 @@
 defmodule Grabakey.UserChangesetTest do
   use Grabakey.DataCase, async: false
 
-  @empty %{email: nil, verified: false, pubkey: "EMPTY", token: "EMPTY"}
+  @empty %{email: nil, pubkey: "EMPTY", token: "EMPTY"}
 
   test "email must be non blank" do
     changeset = User.changeset(%User{}, %{@empty | email: ""})
