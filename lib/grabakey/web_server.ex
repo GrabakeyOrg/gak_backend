@@ -1,4 +1,14 @@
 defmodule Grabakey.WebServer do
+  def child_spec(opts) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [opts]},
+      type: :worker,
+      restart: :permanent,
+      shutdown: 500
+    }
+  end
+
   @doc """
   see https://ninenines.eu/docs/en/cowboy/2.6/manual/
 

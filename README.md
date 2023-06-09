@@ -27,11 +27,25 @@ API
 - PUT /api/users/:id <- token+pubkey
 - GET /api/users/:id -> pubkey
 
+```bash
+ssh-keygen -t ed25519
+cat ~/.ssh/id_ed25519.pub
+iex -S mix
+curl -v localhost:31601/api/users -X POST -d user@grabakey.org
+sqlite3 grabakey_dev.db "select * from users"
+curl -v localhost:31601/api/users/01H2H215K5A56YBNKVE3E008ST
+curl -v localhost:31601/api/users/01H2H215K5A56YBNKVE3E008ST -X PUT -H "Gak-Token: 01H2H215K5JXZ7HFMT8EA96RHY" -d "UPDATED"
+curl -v localhost:31601/api/users/01H2H215K5A56YBNKVE3E008ST -X PUT -H "Gak-Token: 01H2H215K5JXZ7HFMT8EA96RHY" -d @$HOME/.ssh/id_ed25519.pub
+curl -v localhost:31601/api/users/01H2H215K5A56YBNKVE3E008ST -X DELETE -H "Gak-Token: 01H2H1WV7SMEJR4E19HY7S0J38"
+```
+
 ## Todo
 
 - App supervisor
 - Email curl samples
+- Validate pubkey
 - Purge cron job
+- Test failures
 - AWS release
 - DOS delay
 
