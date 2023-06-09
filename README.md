@@ -31,7 +31,8 @@ API
 ## Howto
 
 ```bash
-mix new backend --module Grabakey --app grabakeycd phoenix
+mix new backend --module Grabakey --app grabakey --sup
+cd phoenix
 ```
 
 ## Future
