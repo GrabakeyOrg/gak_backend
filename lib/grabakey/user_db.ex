@@ -7,7 +7,7 @@ defmodule Grabakey.UserDb do
 
     %User{}
     |> User.changeset(%{email: email, token: token, pubkey: "PUBKEY"})
-    |> Repo.insert()
+    |> Repo.insert(conflict_target: :email, on_conflict: {:replace, [:token, :updated_at]})
   end
 
   def find_by_id(id) do

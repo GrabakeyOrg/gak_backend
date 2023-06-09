@@ -10,7 +10,7 @@ defmodule Grabakey.User do
     field(:token, :string)
     field(:verified, :boolean, default: false)
 
-    timestamps()
+    timestamps(type: :utc_datetime_usec)
   end
 
   @doc false

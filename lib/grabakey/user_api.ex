@@ -23,15 +23,18 @@ defmodule Grabakey.UserApi do
     {"pong", req, state}
   end
 
-  # FIXME validate email format
   # FIXME send email with id+token
   def from_text(req, :new = state) do
     len = :cowboy_req.body_length(req)
 
+    # find_by_email required to fetch the real id on conflict update
+    # user.token to get the real updated token even if race condition
     with {true, req} <- {is_integer(len), req},
          {true, req} <- {len <= @max_email_len, req},
          {{:ok, body, req}, _} <- {:cowboy_req.read_body(req), req},
-         {{:ok, _user}, req} <- {UserDb.create_from_email(body), req} do
+         {{:ok, user}, body, req} <- {UserDb.create_from_email(body), body, req},
+         {user, token, req} <- {UserDb.find_by_email(body), user.token, req},
+         {true, _user, _token, req} <- {user != nil, user, token, req} do
       # 204 no content
       {true, req, state}
     else
