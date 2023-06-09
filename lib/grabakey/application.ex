@@ -7,9 +7,10 @@ defmodule Grabakey.Application do
 
   @impl true
   def start(_type, _args) do
+    # Starts a worker by calling: Grabakey.Worker.start_link(arg)
+    # {Grabakey.Worker, arg}
     children = [
-      # Starts a worker by calling: Grabakey.Worker.start_link(arg)
-      # {Grabakey.Worker, arg}
+      Grabakey.Repo
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

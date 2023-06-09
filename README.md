@@ -32,7 +32,12 @@ API
 
 ```bash
 mix new backend --module Grabakey --app grabakey --sup
+mix ecto.gen.repo -r Grabakey.Repo
+mix ecto.gen.migration create_users
 cd phoenix
+mix ecto.migrate
+sqlite3 grabakey_test.db .schema users
+sqlite3 grabakey_dev.db .schema users
 ```
 
 ## Future
