@@ -1,5 +1,6 @@
 defmodule Grabakey.UserApi do
   alias Grabakey.UserDb
+  alias Grabakey.Mailer
 
   @max_email_len 128
 
@@ -24,7 +25,9 @@ defmodule Grabakey.UserApi do
   end
 
   # FIXME send email with id+token
-  def from_text(req, :new = state) do
+  def from_text(req, {:new, delay} = state) do
+    # basic DOS defence
+    :timer.sleep(delay)
     len = :cowboy_req.body_length(req)
 
     # find_by_email required to fetch the real id on conflict update
@@ -34,12 +37,13 @@ defmodule Grabakey.UserApi do
          {{:ok, body, req}, _} <- {:cowboy_req.read_body(req), req},
          {{:ok, user}, body, req} <- {UserDb.create_from_email(body), body, req},
          {user, token, req} <- {UserDb.find_by_email(body), user.token, req},
-         {true, _user, _token, req} <- {user != nil, user, token, req} do
+         {true, user, token, req} <- {user != nil, user, token, req},
+         {{:ok, _res}, req} <- {Mailer.deliver(user, token), req} do
       # 204 no content
       {true, req, state}
     else
       # 400 bad request
-      {_, req} -> {false, req, state}
+      _res -> {false, req, state}
     end
   end
 end

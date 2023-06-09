@@ -9,6 +9,7 @@ defmodule Grabakey.WebServer do
   def start_link(opts \\ []) do
     # name can be any erlang term
     port = Keyword.get(opts, :port, 0)
+    delay = Keyword.get(opts, :delay, 0)
     name = Keyword.get(opts, :name, __MODULE__)
 
     dispatch =
@@ -16,7 +17,7 @@ defmodule Grabakey.WebServer do
         {:_,
          [
            {'/api/ping', __MODULE__, :ping},
-           {'/api/users', Grabakey.UserApi, :new},
+           {'/api/users', Grabakey.UserApi, {:new, delay}},
            {'/api/users/:id', Grabakey.UserApi, :id}
          ]}
       ])
