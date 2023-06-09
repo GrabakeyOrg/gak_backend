@@ -25,6 +25,8 @@ defmodule Grabakey.DataCase do
       import Ecto.Query
       import Grabakey.DataCase
 
+      alias Grabakey.WebServer
+      alias Grabakey.UserDb
       alias Grabakey.User
     end
   end

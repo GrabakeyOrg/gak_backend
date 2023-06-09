@@ -1,6 +1,5 @@
 defmodule Grabakey.WebServerTest do
-  use ExUnit.Case
-  use Grabakey.TestHelper
+  use Grabakey.DataCase, async: false
 
   @email "test@grabakey.org"
 
@@ -26,7 +25,6 @@ defmodule Grabakey.WebServerTest do
   end
 
   test "create user api test" do
-    UserDb.start_link()
     WebServer.start_link()
     port = WebServer.get_port()
     {:ok, conn_pid} = :gun.open('127.0.0.1', port)
@@ -34,11 +32,11 @@ defmodule Grabakey.WebServerTest do
     headers = String.length(@email) |> text_headers()
     stream_ref = :gun.post(conn_pid, '/api/users', headers, @email)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 204, _}
-    id = UserDb.get(@email)
-    assert nil != id
-    assert @email == UserDb.get(id)
+    user = UserDb.find_by_email(@email)
+    assert nil != user.id
+    user = UserDb.find_by_id(user.id)
+    assert @email == user.email
     assert :ok == :gun.shutdown(conn_pid)
     assert :ok == WebServer.stop()
-    assert :ok == UserDb.stop()
   end
 end

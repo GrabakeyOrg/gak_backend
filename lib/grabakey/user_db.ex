@@ -1,40 +1,20 @@
 defmodule Grabakey.UserDb do
-  use Agent
+  alias Grabakey.Repo
+  alias Grabakey.User
 
-  def start_link(_ \\ []) do
-    Agent.start_link(fn -> %{} end, name: __MODULE__)
+  def create_from_email(email) do
+    token = Ecto.ULID.generate()
+
+    %User{}
+    |> User.changeset(%{email: email, token: token, pubkey: "PUBKEY"})
+    |> Repo.insert()
   end
 
-  def stop() do
-    Agent.stop(__MODULE__)
+  def find_by_id(id) do
+    Repo.get_by(User, id: id)
   end
 
-  def create(email) do
-    case get(email) do
-      nil ->
-        id = Ecto.ULID.generate()
-        :ok = put(id, email)
-        :ok = put(email, id)
-        {:ok, id}
-
-      id ->
-        {:ok, id}
-    end
-  end
-
-  def get() do
-    Agent.get(__MODULE__, & &1)
-  end
-
-  def get(key) do
-    Agent.get(__MODULE__, &Map.get(&1, key))
-  end
-
-  def put(key, value) do
-    Agent.update(__MODULE__, &Map.put(&1, key, value))
-  end
-
-  def delete(key) do
-    Agent.update(__MODULE__, &Map.pop(&1, key))
+  def find_by_email(email) do
+    Repo.get_by(User, email: email)
   end
 end

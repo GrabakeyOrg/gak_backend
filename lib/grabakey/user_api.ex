@@ -23,19 +23,20 @@ defmodule Grabakey.UserApi do
     {"pong", req, state}
   end
 
+  # FIXME validate email format
+  # FIXME send email with id+token
   def from_text(req, :new = state) do
     len = :cowboy_req.body_length(req)
 
-    if is_integer(len) and len <= @max_email_len do
-      {:ok, body, req} = :cowboy_req.read_body(req)
-      # FIXME validate email format
-      {:ok, _id} = UserDb.create(body)
-      # FIXME send email with id+token
+    with {true, req} <- {is_integer(len), req},
+         {true, req} <- {len <= @max_email_len, req},
+         {{:ok, body, req}, _} <- {:cowboy_req.read_body(req), req},
+         {{:ok, _user}, req} <- {UserDb.create_from_email(body), req} do
       # 204 no content
       {true, req, state}
     else
       # 400 bad request
-      {false, req, state}
+      {_, req} -> {false, req, state}
     end
   end
 end

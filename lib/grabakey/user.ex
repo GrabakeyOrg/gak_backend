@@ -19,6 +19,7 @@ defmodule Grabakey.User do
     |> cast(attrs, [:email, :pubkey, :token, :verified])
     |> validate_required([:email, :pubkey, :token, :verified])
     |> validate_format(:email, ~r/@/)
+    |> validate_format(:email, ~r/^\S+$/)
     |> unique_constraint(:email)
   end
 end
