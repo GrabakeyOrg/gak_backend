@@ -2,7 +2,7 @@ defmodule Grabakey.UserApi do
   alias Grabakey.UserDb
   alias Grabakey.Mailer
 
-  @max_body_len 128
+  @max_body_len 256
   @token_header "gak-token"
   @headers %{"content-type" => "text/plain"}
 
@@ -34,7 +34,7 @@ defmodule Grabakey.UserApi do
     # find_by_email required to fetch the real id on conflict update
     # user.token to get the real updated token even if race condition
     with {true, req} <- {is_integer(len), req},
-         {true, req} <- {len <= @max_body_len, req},
+         {true, req} <- {len > 3 and len <= @max_body_len, req},
          {{:ok, email, req}, _} <- {:cowboy_req.read_body(req), req},
          {{:ok, user}, email, req} <- {UserDb.create_from_email(email), email, req},
          {user, token, req} <- {UserDb.find_by_email(email), user.token, req},
@@ -43,7 +43,9 @@ defmodule Grabakey.UserApi do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else
-      _res -> {:stop, req, state}
+      _res ->
+        req = :cowboy_req.reply(400, req)
+        {:ok, req, state}
     end
   end
 
@@ -52,13 +54,17 @@ defmodule Grabakey.UserApi do
     token = :cowboy_req.header(@token_header, req)
 
     with {true, req} <- {is_binary(token), req},
+         {{:ok, _}, req} <- {Ecto.ULID.cast(id), req},
+         {{:ok, _}, req} <- {Ecto.ULID.cast(token), req},
          {user, req} <- {UserDb.find_by_id_and_token(id, token), req},
          {true, user, req} <- {user != nil, user, req},
          {{:ok, _res}, req} <- {UserDb.delete(user), req} do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else
-      _res -> {:stop, req, state}
+      _res ->
+        req = :cowboy_req.reply(400, req)
+        {:ok, req, state}
     end
   end
 
@@ -67,16 +73,22 @@ defmodule Grabakey.UserApi do
     id = :cowboy_req.binding(:id, req)
     token = :cowboy_req.header(@token_header, req)
 
-    with {true, req} <- {is_integer(len), req},
-         {true, req} <- {len <= @max_body_len, req},
+    with {true, req} <- {is_binary(token), req},
+         {{:ok, _}, req} <- {Ecto.ULID.cast(id), req},
+         {{:ok, _}, req} <- {Ecto.ULID.cast(token), req},
+         {true, req} <- {is_integer(len), req},
+         {true, req} <- {len > 0 and len <= @max_body_len, req},
          {{:ok, pubkey, req}, _} <- {:cowboy_req.read_body(req), req},
+         {true, pubkey, req} <- {valid_pubkey?(pubkey), pubkey, req},
          {user, req} <- {UserDb.find_by_id_and_token(id, token), req},
          {true, user, req} <- {user != nil, user, req},
          {{:ok, _res}, req} <- {UserDb.update_pubkey(user, pubkey), req} do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else
-      _res -> {:stop, req, state}
+      _res ->
+        req = :cowboy_req.reply(400, req)
+        {:ok, req, state}
     end
   end
 
@@ -88,12 +100,21 @@ defmodule Grabakey.UserApi do
       req = :cowboy_req.reply(200, @headers, user.pubkey, req)
       {:ok, req, state}
     else
-      _res -> {:stop, req, state}
+      _res ->
+        req = :cowboy_req.reply(400, req)
+        {:ok, req, state}
     end
   end
 
   # FIXME basic DOS defence
   defp dos_delay(_state, _method) do
     :timer.sleep(0)
+  end
+
+  defp valid_pubkey?(pubkey) do
+    case String.split(pubkey, " ") do
+      ["ssh-ed25519", _, _] -> true
+      _ -> false
+    end
   end
 end

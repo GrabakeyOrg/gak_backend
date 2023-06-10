@@ -2,11 +2,13 @@ defmodule Grabakey.UserDb do
   alias Grabakey.Repo
   alias Grabakey.User
 
+  @pubkey "ssh-ed25519 PUBKEY nobody@localhost"
+
   def create_from_email(email) do
     token = Ecto.ULID.generate()
 
     %User{}
-    |> User.changeset(%{email: email, token: token, pubkey: "PUBKEY"})
+    |> User.changeset(%{email: email, token: token, pubkey: @pubkey})
     |> Repo.insert(conflict_target: :email, on_conflict: {:replace, [:token, :updated_at]})
   end
 

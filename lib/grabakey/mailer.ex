@@ -55,7 +55,7 @@ defmodule Grabakey.Mailer do
     # generate an ed25519 ssh key pair<br/>
     <b>ssh-keygen -t ed25519</b><br/>
     <br/>
-    # upload your ed25519 public key (128 byte size limit)<br/>
+    # upload your ed25519 public key (256 byte size limit)<br/>
     <b>curl #{baseurl}/api/users/#{id} -X PUT -H "Gak-Token: #{token}" -d @$HOME/.ssh/id_ed25519.pub</b><br/>
     <br/>
     # show your current pubkey<br/>

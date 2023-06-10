@@ -27,6 +27,15 @@ API
 - PUT /api/users/:id <- token+pubkey
 - GET /api/users/:id -> pubkey
 
+Errors
+
+- curl -v localhost:31601/api/usersX -X POST -d user@grabakey.org
+  - 404 not found
+- curl -v localhost:31601/api/users/X -X DELETE
+- curl -v localhost:31601/api/users -X POST
+  - 400 bad request (failed validation)
+  - 500 internal error (on exception)
+
 ```bash
 ssh-keygen -t ed25519
 cat ~/.ssh/id_ed25519.pub
@@ -43,10 +52,8 @@ curl -v localhost:31601/api/users/01H2H215K5A56YBNKVE3E008ST -X DELETE -H "Gak-T
 
 - Entry module
 - Cache headers
-- Validate pubkey
 - Purge cron job
 - SPF softfail
-- Error codes
 - AWS release
 - DOS delay
 

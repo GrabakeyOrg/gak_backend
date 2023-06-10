@@ -2,6 +2,8 @@ defmodule Grabakey.WebServerTest do
   use Grabakey.DataCase, async: false
 
   @email "test@grabakey.org"
+  @pubkey1 "ssh-ed25519 PUBKEY nobody@localhost"
+  @pubkey2 "ssh-ed25519 UPDATED nobody@localhost"
   @toms 4000
 
   defp build_headers(opts \\ []) do
@@ -76,10 +78,10 @@ defmodule Grabakey.WebServerTest do
     assert_receive {:gun_up, ^conn_pid, :http}
     {:ok, user} = UserDb.create_from_email(@email)
     headers = build_headers(token: user.token)
-    stream_ref = :gun.put(conn_pid, '/api/users/#{user.id}', headers, "UPDATED")
+    stream_ref = :gun.put(conn_pid, '/api/users/#{user.id}', headers, @pubkey2)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
     user2 = UserDb.find_by_email(@email)
-    assert "UPDATED" == user2.pubkey
+    assert @pubkey2 == user2.pubkey
     assert user.token != user2.token
     assert :ok == :gun.shutdown(conn_pid)
   end
@@ -93,7 +95,7 @@ defmodule Grabakey.WebServerTest do
     stream_ref = :gun.get(conn_pid, '/api/users/#{user.id}', headers)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
     {:ok, body} = :gun.await_body(conn_pid, stream_ref)
-    assert "PUBKEY" == body
+    assert @pubkey1 == body
     assert :ok == :gun.shutdown(conn_pid)
   end
 end
