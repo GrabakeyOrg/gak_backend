@@ -28,7 +28,7 @@ defmodule Grabakey.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:gun, "~> 2.0"},
+      {:gun, "~> 2.0", only: :test},
       {:cowboy, "~> 2.10"},
       {:ecto_ulid_next, "~> 1.0"},
       {:ecto_sqlite3, "~> 0.10.3"},

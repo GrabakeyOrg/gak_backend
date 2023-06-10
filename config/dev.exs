@@ -9,3 +9,6 @@ config :grabakey, Grabakey.Repo,
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
+
+# requires :plug_cowboy
+# config :swoosh, serve_mailbox: true

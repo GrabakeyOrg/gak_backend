@@ -30,7 +30,7 @@ defmodule Grabakey.WebServer do
          ]}
       ])
 
-    trans_opts = [port: port]
+    trans_opts = [port: port, ip: {0, 0, 0, 0}]
     proto_opts = %{env: %{dispatch: dispatch}}
     :cowboy.start_clear(name, trans_opts, proto_opts)
   end

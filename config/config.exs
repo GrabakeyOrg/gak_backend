@@ -12,7 +12,7 @@ delay =
 port =
   case config_env() do
     :test -> "0"
-    _ -> "31601"
+    _ -> "31681"
   end
 
 port = System.get_env("GAK_SERVER_PORT", port)
@@ -22,11 +22,8 @@ config :grabakey,
   server_port: String.to_integer(port),
   mailer_config: [
     baseurl: "localhost:#{port}",
-    adapter: Swoosh.Adapters.AmazonSES,
-    enabled: System.get_env("GAK_AWSSES_ENABLED", "false") |> String.to_atom(),
-    region: System.get_env("GAK_AWSSES_REGION"),
-    access_key: System.get_env("GAK_AWSSES_ACCESSKEY"),
-    secret: System.get_env("GAK_AWSSES_SECRET")
+    adapter: Swoosh.Adapters.Local,
+    enabled: System.get_env("GAK_MAILER_ENABLED", "false") |> String.to_atom()
   ],
   ecto_repos: [Grabakey.Repo],
   generators: [binary_id: true]
