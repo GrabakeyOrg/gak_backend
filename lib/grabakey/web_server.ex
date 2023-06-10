@@ -18,14 +18,15 @@ defmodule Grabakey.WebServer do
     # name can be any erlang term
     port = Keyword.get(opts, :port, 0)
     name = Keyword.get(opts, :name, __MODULE__)
+    delay = Keyword.get(opts, :delay, 0)
 
     dispatch =
       :cowboy_router.compile([
         {:_,
          [
            {'/api/ping', __MODULE__, :ping},
-           {'/api/users', Grabakey.UserApi, :new},
-           {'/api/users/:id', Grabakey.UserApi, :id}
+           {'/api/users', Grabakey.UserApi, {:new, delay}},
+           {'/api/users/:id', Grabakey.UserApi, {:id, delay}}
          ]}
       ])
 

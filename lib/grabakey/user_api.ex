@@ -5,26 +5,41 @@ defmodule Grabakey.UserApi do
   @max_body_len 256
   @token_header "gak-token"
   @headers %{"content-type" => "text/plain"}
+  @fail_delay 1000
 
-  def init(req, :new = state) do
+  def init(req, {:new, _} = state) do
     method = :cowboy_req.method(req)
-    dos_delay(state, method)
+    dos_delay(method, state)
 
     case method do
-      "POST" -> create_user(req, state)
-      _ -> {:stop, req, state}
+      "POST" ->
+        create_user(req, state)
+
+      _ ->
+        fail_delay()
+        req = :cowboy_req.reply(404, req)
+        {:ok, req, state}
     end
   end
 
-  def init(req, :id = state) do
+  def init(req, {:id, _} = state) do
     method = :cowboy_req.method(req)
-    dos_delay(state, method)
+    dos_delay(method, state)
 
     case method do
-      "GET" -> get_pubkey(req, state)
-      "PUT" -> update_pubkey(req, state)
-      "DELETE" -> delete_user(req, state)
-      _ -> {:stop, req, state}
+      "GET" ->
+        get_pubkey(req, state)
+
+      "PUT" ->
+        update_pubkey(req, state)
+
+      "DELETE" ->
+        delete_user(req, state)
+
+      _ ->
+        fail_delay()
+        req = :cowboy_req.reply(404, req)
+        {:ok, req, state}
     end
   end
 
@@ -44,6 +59,7 @@ defmodule Grabakey.UserApi do
       {:ok, req, state}
     else
       _res ->
+        fail_delay()
         req = :cowboy_req.reply(400, req)
         {:ok, req, state}
     end
@@ -63,6 +79,7 @@ defmodule Grabakey.UserApi do
       {:ok, req, state}
     else
       _res ->
+        fail_delay()
         req = :cowboy_req.reply(400, req)
         {:ok, req, state}
     end
@@ -87,6 +104,7 @@ defmodule Grabakey.UserApi do
       {:ok, req, state}
     else
       _res ->
+        fail_delay()
         req = :cowboy_req.reply(400, req)
         {:ok, req, state}
     end
@@ -101,14 +119,23 @@ defmodule Grabakey.UserApi do
       {:ok, req, state}
     else
       _res ->
+        fail_delay()
         req = :cowboy_req.reply(400, req)
         {:ok, req, state}
     end
   end
 
-  # FIXME basic DOS defence
-  defp dos_delay(_state, _method) do
-    :timer.sleep(0)
+  defp dos_delay(method, {_, delay}) do
+    case method do
+      "PUT" -> :timer.sleep(delay)
+      "POST" -> :timer.sleep(delay)
+      "DELETE" -> :timer.sleep(delay)
+      "GET" -> :nop
+    end
+  end
+
+  defp fail_delay() do
+    :timer.sleep(@fail_delay)
   end
 
   defp valid_pubkey?(pubkey) do

@@ -1,5 +1,14 @@
 import Config
 
+# Only bring here things that depend on the development or deploy environment
+# Do not pollute with things that do not depend on config_env() or environ variables
+
+delay =
+  case config_env() do
+    :test -> 0
+    _ -> 1000
+  end
+
 port =
   case config_env() do
     :test -> "0"
@@ -9,6 +18,7 @@ port =
 port = System.get_env("GAK_SERVER_PORT", port)
 
 config :grabakey,
+  dos_delay: delay,
   server_port: String.to_integer(port),
   mailer_config: [
     baseurl: "localhost:#{port}",

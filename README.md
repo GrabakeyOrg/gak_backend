@@ -35,6 +35,8 @@ Errors
 - curl -v localhost:31601/api/users -X POST
   - 400 bad request (failed validation)
   - 500 internal error (on exception)
+- curl -v localhost:31601/api/users -X DELETE
+  - 500 internal error (on :stop)
 
 ```bash
 ssh-keygen -t ed25519
@@ -55,7 +57,6 @@ curl -v localhost:31601/api/users/01H2H215K5A56YBNKVE3E008ST -X DELETE -H "Gak-T
 - Purge cron job
 - SPF softfail
 - AWS release
-- DOS delay
 
 ## Howto
 

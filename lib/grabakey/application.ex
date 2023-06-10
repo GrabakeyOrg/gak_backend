@@ -9,13 +9,14 @@ defmodule Grabakey.Application do
   def start(_type, _args) do
     port = Application.fetch_env!(:grabakey, :server_port)
     config = Application.fetch_env!(:grabakey, :mailer_config)
+    delay = Application.fetch_env!(:grabakey, :dos_delay)
 
     # Starts a worker by calling: Grabakey.Worker.start_link(arg)
     # {Grabakey.Worker, arg}
     children = [
       Grabakey.Repo,
       {Grabakey.Mailer, config: config},
-      {Grabakey.WebServer, port: port}
+      {Grabakey.WebServer, port: port, delay: delay}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
