@@ -41,11 +41,12 @@ curl -v localhost:31601/api/users/01H2H215K5A56YBNKVE3E008ST -X DELETE -H "Gak-T
 
 ## Todo
 
-- App supervisor
-- Email curl samples
+- Entry module
+- Cache headers
 - Validate pubkey
 - Purge cron job
-- Test failures
+- SPF softfail
+- Error codes
 - AWS release
 - DOS delay
 

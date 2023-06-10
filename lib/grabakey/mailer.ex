@@ -31,7 +31,7 @@ defmodule Grabakey.Mailer do
     |> to(user.email)
     |> from({"Grabakey Mailer", @mailer})
     |> subject("Grabakey token and next steps")
-    |> text_body(body(user.id, user.email, token, baseurl))
+    |> html_body(body(user.id, user.email, token, baseurl))
     |> adapter.deliver(config)
   end
 
@@ -41,25 +41,28 @@ defmodule Grabakey.Mailer do
 
   defp body(id, email, token, baseurl) do
     """
-    You just ran:
-
-    curl #{baseurl}/api/users -X POST -d #{email}
-
-    With output:
-
-    UserID: #{id}
-    Token: #{token}
-
-    Next possible steps are:
-
-    # get your current pubkey
-    curl -w "\\n" #{baseurl}/api/users/#{id}
-    # generate an ed25519 ssh key pair
-    ssh-keygen -t ed25519
-    # upload your ed25519 public key
-    curl #{baseurl}/api/users/#{id} -X PUT -H "Gak-Token: #{token}" -d @$HOME/.ssh/id_ed25519.pub
-    # delete your user account
-    curl #{baseurl}/api/users/#{id} -X DELETE -H "Gak-Token: #{token}"
+    You just ran:<br/>
+    <br/>
+    <b>curl #{baseurl}/api/users -X POST -d #{email}</b><br/>
+    <br/>
+    With output:<br/>
+    <br/>
+    <b>UserID:</b> #{id}<br/>
+    <b>Token:</b> #{token}<br/>
+    <br/>
+    Next possible steps are:<br/>
+    <br/>
+    # generate an ed25519 ssh key pair<br/>
+    <b>ssh-keygen -t ed25519</b><br/>
+    <br/>
+    # upload your ed25519 public key (128 byte size limit)<br/>
+    <b>curl #{baseurl}/api/users/#{id} -X PUT -H "Gak-Token: #{token}" -d @$HOME/.ssh/id_ed25519.pub</b><br/>
+    <br/>
+    # show your current pubkey<br/>
+    <b>curl -w "\\n" #{baseurl}/api/users/#{id}</b><br/>
+    <br/>
+    # delete your account<br/>
+    <b>curl #{baseurl}/api/users/#{id} -X DELETE -H "Gak-Token: #{token}"</b><br/>
     """
   end
 end
