@@ -43,7 +43,7 @@ defmodule Grabakey.UserApi do
     end
   end
 
-  def create_user(req, state) do
+  def create_user(req, {_, %{mailer: mailer}} = state) do
     len = :cowboy_req.body_length(req)
 
     # find_by_email required to fetch the real id on conflict update
@@ -54,7 +54,7 @@ defmodule Grabakey.UserApi do
          {{:ok, user}, email, req} <- {UserDb.create_from_email(email), email, req},
          {user, token, req} <- {UserDb.find_by_email(email), user.token, req},
          {true, user, token, req} <- {user != nil, user, token, req},
-         {{:ok, _res}, req} <- {Mailer.deliver(user, token), req} do
+         {{:ok, _res}, req} <- {Mailer.deliver(user, token, mailer), req} do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else
@@ -113,7 +113,8 @@ defmodule Grabakey.UserApi do
   def get_pubkey(req, state) do
     id = :cowboy_req.binding(:id, req)
 
-    with {user, req} <- {UserDb.find_by_id(id), req},
+    with {{:ok, _}, req} <- {Ecto.ULID.cast(id), req},
+         {user, req} <- {UserDb.find_by_id(id), req},
          {true, user, req} <- {user != nil, user, req} do
       req = :cowboy_req.reply(200, @headers, user.pubkey, req)
       {:ok, req, state}
@@ -125,7 +126,7 @@ defmodule Grabakey.UserApi do
     end
   end
 
-  defp dos_delay(method, {_, delay}) do
+  defp dos_delay(method, {_, %{delay: delay}}) do
     case method do
       "PUT" -> :timer.sleep(delay)
       "POST" -> :timer.sleep(delay)

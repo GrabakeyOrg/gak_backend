@@ -13,6 +13,8 @@ COPY lib ./lib
 COPY test ./test
 COPY priv ./priv
 COPY config ./config
+RUN mkdir .secrets
+RUN touch .secrets/private.pem
 
 ENV MIX_ENV=prod
 RUN mix release
@@ -24,8 +26,12 @@ RUN apk add --no-cache curl
 RUN apk add --no-cache netcat-openbsd
 
 COPY --from=release_stage $HOME/_build .
+COPY .secrets ./prod/.secrets
 RUN adduser -S -u 1001 -G root nonroot
 RUN chown -R nonroot ./prod
 USER nonroot
+# mailer needs sshuttle masquerading
+ENV GAK_MAILER_ENABLED=false
+ENV GAK_PRIVKEY_PATH=/prod/.secrets/private.pem 
 ENV GAK_DATABASE_PATH=/prod/grabakey_rel.db
 CMD ["./prod/rel/grabakey/bin/grabakey", "start"]

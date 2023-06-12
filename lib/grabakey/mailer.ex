@@ -1,68 +1,62 @@
 defmodule Grabakey.Mailer do
-  use GenServer
-  import Swoosh.Email
-
   @mailer "mailer@grabakey.org"
 
-  def start_link(opts \\ []) do
-    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
-  end
-
-  def init(opts) do
-    config = Keyword.get(opts, :config, [])
-    {:ok, config}
-  end
-
-  def handle_call({:deliver, user, token}, _from, config) do
+  def deliver(user, token, config) do
     enabled = Keyword.get(config, :enabled, false)
-    result = deliver(enabled, config, user, token)
-    {:reply, result, config}
+
+    if enabled do
+      send(config, user, token)
+    else
+      {:ok, :disabled}
+    end
   end
 
-  def deliver(user, token) do
-    GenServer.call(__MODULE__, {:deliver, user, token})
-  end
-
-  def deliver(true, config, user, token) do
-    adapter = Keyword.fetch!(config, :adapter)
+  def send(config, user, token) do
+    privkey = Keyword.fetch!(config, :privkey)
     baseurl = Keyword.fetch!(config, :baseurl)
+    template = Keyword.fetch!(config, :template)
 
-    new()
-    |> to(user.email)
-    |> from({"Grabakey Mailer", @mailer})
-    |> subject("Grabakey token and next steps")
-    |> html_body(body(user.id, user.email, token, baseurl))
-    |> adapter.deliver(config)
-  end
+    bindings = [
+      id: user.id,
+      token: token,
+      baseurl: baseurl,
+      email: user.email
+    ]
 
-  def deliver(_enabled, _config, _user, _token) do
-    {:ok, :disabled}
-  end
+    {body, _bindings} = Code.eval_quoted(template, bindings)
 
-  defp body(id, email, token, baseurl) do
-    """
-    You just ran:<br/>
-    <br/>
-    <b>curl #{baseurl}/api/users -X POST -d #{email}</b><br/>
-    <br/>
-    With output:<br/>
-    <br/>
-    <b>UserID:</b> #{id}<br/>
-    <b>Token:</b> #{token}<br/>
-    <br/>
-    Next possible steps are:<br/>
-    <br/>
-    # generate an ed25519 ssh key pair<br/>
-    <b>ssh-keygen -t ed25519</b><br/>
-    <br/>
-    # upload your ed25519 public key (256 byte size limit)<br/>
-    <b>curl #{baseurl}/api/users/#{id} -X PUT -H "Gak-Token: #{token}" -d @$HOME/.ssh/id_ed25519.pub</b><br/>
-    <br/>
-    # show your current pubkey<br/>
-    <b>curl -w "\\n" #{baseurl}/api/users/#{id}</b><br/>
-    <br/>
-    # delete your account<br/>
-    <b>curl #{baseurl}/api/users/#{id} -X DELETE -H "Gak-Token: #{token}"</b><br/>
-    """
+    dkim_opts = [
+      {:s, "dkim"},
+      {:d, "grabakey.org"},
+      {:private_key, {:pem_plain, privkey}}
+    ]
+
+    signed_mail_body =
+      :mimemail.encode(
+        {"text", "html",
+         [
+           {"Subject", "Grabakey token and next steps"},
+           {"From", "Grabakey Mailer <#{@mailer}>"},
+           {"To", user.email}
+         ], %{}, body},
+        dkim: dkim_opts
+      )
+
+    result =
+      :gen_smtp_client.send_blocking(
+        {
+          @mailer,
+          [user.email],
+          signed_mail_body
+        },
+        relay: "grabakey.org",
+        trace_fun: &:io.format/2
+      )
+
+    # {:error, :retries_exceeded, {:network_failure, 'alt4.gmr-smtp-in.l.google.com', {:error, :econnrefused}}}
+    case result do
+      mail_id when is_binary(mail_id) -> {:ok, mail_id}
+      error -> error
+    end
   end
 end

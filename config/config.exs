@@ -3,6 +3,12 @@ import Config
 # Only bring here things that depend on the development or deploy environment
 # Do not pollute with things that do not depend on config_env() or environ variables
 
+# To send email from dev environ through grabakey.org server
+# brew install sshuttle
+# sshuttle -r grabakey.org 0.0.0.0/0
+# [local sudo] Password:
+# c : Connected to server.
+
 delay =
   case config_env() do
     :test -> 0
@@ -22,7 +28,8 @@ config :grabakey,
   server_port: String.to_integer(port),
   mailer_config: [
     baseurl: "localhost:#{port}",
-    adapter: Swoosh.Adapters.Local,
+    privkey: File.read!(".secrets/private.pem"),
+    template: EEx.compile_file("priv/templates/email.eex"),
     enabled: System.get_env("GAK_MAILER_ENABLED", "false") |> String.to_atom()
   ],
   ecto_repos: [Grabakey.Repo],

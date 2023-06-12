@@ -19,14 +19,16 @@ defmodule Grabakey.WebServer do
     port = Keyword.get(opts, :port, 0)
     name = Keyword.get(opts, :name, __MODULE__)
     delay = Keyword.get(opts, :delay, 0)
+    mailer = Keyword.get(opts, :mailer, [])
+    state = %{mailer: mailer, delay: delay}
 
     dispatch =
       :cowboy_router.compile([
         {:_,
          [
            {'/api/ping', __MODULE__, :ping},
-           {'/api/users', Grabakey.UserApi, {:new, delay}},
-           {'/api/users/:id', Grabakey.UserApi, {:id, delay}}
+           {'/api/users', Grabakey.UserApi, {:new, state}},
+           {'/api/users/:id', Grabakey.UserApi, {:id, state}}
          ]}
       ])
 

@@ -1,0 +1,22 @@
+You just ran:<br/>
+<br/>
+<b>curl -w "%{http_code}\n" <%= baseurl %>/api/users -d <%= email %></b><br/>
+<br/>
+With output:<br/>
+<br/>
+<b>UserID:</b> <%= id %><br/>
+<b>Token:</b> <%= token %><br/>
+<br/>
+Next possible steps are:<br/>
+<br/>
+# generate an ed25519 ssh key pair<br/>
+<b>ssh-keygen -t ed25519</b><br/>
+<br/>
+# upload your ed25519 public key (256 byte size limit)<br/>
+<b>curl -w "%{http_code}\n" <%= baseurl %>/api/users/<%= id %> -X PUT -H "Gak-Token: <%= token %>" -d @$HOME/.ssh/id_ed25519.pub</b><br/>
+<br/>
+# show your current pubkey<br/>
+<b>curl -w "\n%{http_code}\n" <%= baseurl %>/api/users/<%= id %></b><br/>
+<br/>
+# delete your account<br/>
+<b>curl -w "%{http_code}\n" <%= baseurl %>/api/users/<%= id %> -X DELETE -H "Gak-Token: <%= token %>"</b><br/>

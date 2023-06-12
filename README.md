@@ -55,8 +55,7 @@ curl -v localhost:31681/api/users/01H2H215K5A56YBNKVE3E008ST -X DELETE -H "Gak-T
 - Entry module
 - Cache headers
 - Purge cron job
-- SPF softfail
-- AWS release
+- Deploy release
 
 ## Howto
 
@@ -82,8 +81,11 @@ docker image rm ImageID
 docker run -p 31681:31681 --name grabakey grabakey
 docker run -p 31681:31681 --env-file ../.docker.env --name grabakey grabakey
 docker run --net=host --env-file ../.docker.env --name grabakey grabakey
-docker exec -it grabakey /bin/sh
+docker exec -it grabakey /prod/rel/grabakey/bin/grabakey
+docker exec -it grabakey /prod/rel/grabakey/bin/grabakey remote
 docker exec -it grabakey curl -v localhost:31681/api/users -d user@grabakey.org
+docker exec -it grabakey sqlite3 prod/grabakey_rel.db "select * from users"
+docker exec -it grabakey /bin/sh
 sqlite3 prod/grabakey_rel.db "select * from users"
 docker rm grabakey
 docker container ls --all
