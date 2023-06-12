@@ -15,6 +15,7 @@ defmodule Grabakey.Mailer do
     privkey = Keyword.fetch!(config, :privkey)
     baseurl = Keyword.fetch!(config, :baseurl)
     template = Keyword.fetch!(config, :template)
+    hostname = Keyword.get(config, :hostname)
 
     bindings = [
       id: user.id,
@@ -44,6 +45,25 @@ defmodule Grabakey.Mailer do
 
     [_, domain] = String.split(user.email, "@")
 
+    send_opts = [
+      tls: :always,
+      relay: domain,
+      tls_options: [
+        verify: :verify_peer,
+        depth: 99,
+        cacerts: :certifi.cacerts(),
+        customize_hostname_check: [
+          match_fun: fn _, _ -> true end
+        ]
+      ]
+    ]
+
+    send_opts =
+      case hostname do
+        nil -> send_opts
+        _ -> send_opts ++ [hostname: hostname]
+      end
+
     result =
       :gen_smtp_client.send_blocking(
         {
@@ -51,8 +71,7 @@ defmodule Grabakey.Mailer do
           [user.email],
           signed_mail_body
         },
-        relay: domain,
-        trace_fun: &:io.format/2
+        send_opts
       )
 
     # {:error, :retries_exceeded, {:network_failure, 'alt4.gmr-smtp-in.l.google.com', {:error, :econnrefused}}}

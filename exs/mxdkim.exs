@@ -32,7 +32,17 @@ signed_mail_body =
     ["hello@grabakey.org"],
     signed_mail_body
   },
+  tls: :always,
   relay: "grabakey.org",
-  trace_fun: &:io.format/2
+  hostname: "grabakey.org",
+  trace_fun: &:io.format/2,
+  tls_options: [
+    verify: :verify_peer,
+    depth: 99,
+    cacerts: :certifi.cacerts(),
+    customize_hostname_check: [
+      match_fun: fn _, _ -> true end
+    ]
+  ]
 )
 |> IO.inspect()

@@ -29,6 +29,7 @@ defmodule Grabakey.MixProject do
       {:cowboy, "~> 2.10"},
       {:ecto_ulid_next, "~> 1.0"},
       {:ecto_sqlite3, "~> 0.10.3"},
+      {:certifi, "~> 2.11"},
       {:gen_smtp, "~> 1.2"}
     ]
   end
