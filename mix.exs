@@ -13,19 +13,16 @@ defmodule Grabakey.MixProject do
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :crypto],
       mod: {Grabakey.Application, []}
     ]
   end
 
-  # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:gun, "~> 2.0", only: :test},
@@ -33,17 +30,9 @@ defmodule Grabakey.MixProject do
       {:ecto_ulid_next, "~> 1.0"},
       {:ecto_sqlite3, "~> 0.10.3"},
       {:gen_smtp, "~> 1.2"}
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
   end
 
-  # Aliases are shortcuts or tasks specific to the current project.
-  # For example, to install project dependencies and perform other setup tasks, run:
-  #
-  #     $ mix setup
-  #
-  # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]

@@ -42,6 +42,8 @@ defmodule Grabakey.Mailer do
         dkim: dkim_opts
       )
 
+    [_, domain] = String.split(user.email, "@")
+
     result =
       :gen_smtp_client.send_blocking(
         {
@@ -49,7 +51,7 @@ defmodule Grabakey.Mailer do
           [user.email],
           signed_mail_body
         },
-        relay: "grabakey.org",
+        relay: domain,
         trace_fun: &:io.format/2
       )
 

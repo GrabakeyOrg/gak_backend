@@ -1,0 +1,35 @@
+#!/bin/bash -x
+
+# tmux ls
+# tmux detach ctrl+b d
+# tmux a //athach to unique session
+# tmux a -t grabakey
+case $1 in
+  deploy)
+    MIX_ENV=prod mix release --overwrite
+    rsync grabakey grabakey.org:bin/
+    ssh grabakey.org bin/grabakey stop 
+    rsync -r _build/prod/rel/grabakey grabakey.org:rel/
+    rsync -r .secrets grabakey.org:rel/grabakey/
+    ssh grabakey.org bin/grabakey start 
+  ;;
+  stop)
+    ~/rel/grabakey/bin/grabakey stop
+  ;;
+  start)
+    export GAK_MAILER_ENABLED=true
+    export GAK_PRIVKEY_PATH=~/rel/grabakey/.secrets/private.pem 
+    export GAK_DATABASE_PATH=~/rel/grabakey_rel.db 
+    tmux new -d -s grabakey ~/rel/grabakey/bin/grabakey start
+  ;;
+  letsencrypt)
+    V2="--server https://acme-v02.api.letsencrypt.org/directory"
+    sudo service nginx stop
+    sudo letsencrypt certonly --standalone -d grabakey.org --force-renew $V2
+    sudo letsencrypt certonly --standalone -d www.grabakey.org --force-renew $V2
+    sudo service nginx start  
+  ;;
+  *)
+    ~/rel/grabakey/bin/grabakey "$@"
+  ;;
+esac

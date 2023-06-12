@@ -11,7 +11,7 @@ if config_env() == :prod and System.get_env("RELEASE_NAME") != nil do
   config :grabakey,
     server_port: String.to_integer(port),
     mailer_config: [
-      baseurl: "grabakey.org",
+      baseurl: "https://grabakey.org",
       privkey: File.read!(privkey),
       enabled: System.get_env("GAK_MAILER_ENABLED", "false") |> String.to_atom()
     ]
