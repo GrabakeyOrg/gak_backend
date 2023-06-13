@@ -9,15 +9,17 @@ case $1 in
     MIX_ENV=prod mix release --overwrite
     rsync grabakey grabakey.org:bin/
     ssh grabakey.org bin/grabakey stop 
-    rsync -r _build/prod/rel/grabakey grabakey.org:rel/
+    # remove old priv files (duplicated migration)
+    rsync --delete -r _build/prod/rel/grabakey grabakey.org:rel/
     ssh grabakey.org bin/grabakey start 
   ;;
   stop)
     ~/rel/grabakey/bin/grabakey stop
   ;;
   start)
+    mkdir -p ~/rel/database/
     export GAK_MAILER_ENABLED=true
-    export GAK_DATABASE_PATH=~/rel/grabakey_rel.db 
+    export GAK_DATABASE_PATH=~/rel/database/grabakey_rel.db 
     tmux new -d -s grabakey ~/rel/grabakey/bin/grabakey start
   ;;
   local)

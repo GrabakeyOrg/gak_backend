@@ -2,12 +2,12 @@
 You just ran:<br/>
 <br/>
 <div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
-curl -w "%{http_code}\n" <%= baseurl %>/api/users -d <%= email %>
+curl -w "%{http_code}\n" <%= baseurl %>/api/pubkey -d <%= email %>
 </div>
 <br/>
 With output:<br/>
 <br/>
-<b>UserID:</b> <%= id %><br/>
+<b>ID:</b> <%= id %><br/>
 <b>Token:</b> <%= token %><br/>
 <br/>
 Next possible steps are:<br/>
@@ -19,12 +19,12 @@ ssh-keygen -t ed25519
 <br/>
 <span style="color: ForestGreen;"># upload your ed25519 public key (256 byte size limit)</span><br/>
 <div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
-curl -w "%{http_code}\n" <%= baseurl %>/api/users/<%= id %> -X PUT -H "Gak-Token: <%= token %>" -d @$HOME/.ssh/id_ed25519.pub
+curl -w "%{http_code}\n" <%= baseurl %>/api/pubkey/<%= id %> -X PUT -H "Gak-Token: <%= token %>" -d @$HOME/.ssh/id_ed25519.pub
 </div>
 <br/>
-<span style="color: ForestGreen;"># show your current pubkey</span><br/>
+<span style="color: ForestGreen;"># show your current public key</span><br/>
 <div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
-curl -w "\n%{http_code}\n" <%= baseurl %>/api/users/<%= id %>
+curl -w "\n%{http_code}\n" <%= baseurl %>/api/pubkey/<%= id %>
 </div>
 <br/>
 <span style="color: ForestGreen;"># install in your sshd server</span><br/>
@@ -34,9 +34,9 @@ gak_installer/install <%= id %><br/>
 rm -fr gak_installer
 </div>
 <br/>
-<span style="color: ForestGreen;"># delete your account</span><br/>
+<span style="color: ForestGreen;"># delete your public key (non recoverable)</span><br/>
 <div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
-curl -w "%{http_code}\n" <%= baseurl %>/api/users/<%= id %> -X DELETE -H "Gak-Token: <%= token %>"
+curl -w "%{http_code}\n" <%= baseurl %>/api/pubkey/<%= id %> -X DELETE -H "Gak-Token: <%= token %>"
 </div>
 <br/>
 </div>

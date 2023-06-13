@@ -27,9 +27,9 @@ config :grabakey,
   dos_delay: delay,
   server_port: String.to_integer(port),
   mailer_config: [
-    baseurl: "localhost:#{port}",
+    baseurl: "http://localhost:#{port}",
     privkey: File.read!(".secrets/private.pem"),
-    template: EEx.compile_file("priv/templates/email.eex"),
+    template: EEx.compile_file("priv/templates/create.eex"),
     enabled: System.get_env("GAK_MAILER_ENABLED", "false") |> String.to_atom()
   ],
   ecto_repos: [Grabakey.Repo],

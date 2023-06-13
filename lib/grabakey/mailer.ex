@@ -1,30 +1,34 @@
 defmodule Grabakey.Mailer do
   @mailer "mailer@grabakey.org"
 
-  def deliver(user, token, config) do
+  def deliver(config, pubkey, token) do
     enabled = Keyword.get(config, :enabled, false)
 
     if enabled do
-      send(config, user, token)
+      eval_and_send(config, pubkey, token)
     else
       {:ok, :disabled}
     end
   end
 
-  def send(config, user, token) do
-    privkey = Keyword.fetch!(config, :privkey)
+  def eval_and_send(config, pubkey, token) do
     baseurl = Keyword.fetch!(config, :baseurl)
     template = Keyword.fetch!(config, :template)
-    hostname = Keyword.get(config, :hostname)
 
     bindings = [
-      id: user.id,
+      id: pubkey.id,
       token: token,
       baseurl: baseurl,
-      email: user.email
+      email: pubkey.email
     ]
 
     {body, _bindings} = Code.eval_quoted(template, bindings)
+
+    send_sync_mxdns(config, pubkey.email, "Grabakey ID and next steps", body)
+  end
+
+  def send_sync_mxdns(config, to, subject, body) do
+    privkey = Keyword.fetch!(config, :privkey)
 
     dkim_opts = [
       {:s, "dkim"},
@@ -37,18 +41,19 @@ defmodule Grabakey.Mailer do
       :mimemail.encode(
         {"text", "html",
          [
-           {"Subject", "Grabakey token and next steps"},
+           {"Subject", subject},
            {"From", "Grabakey Mailer <#{@mailer}>"},
-           {"To", user.email}
+           {"To", to}
          ], %{content_type_params: [{"charset", "utf-8"}]}, body},
         dkim: dkim_opts
       )
 
-    [_, domain] = String.split(user.email, "@")
+    [_, domain] = String.split(to, "@")
 
     send_opts = [
       tls: :always,
       relay: domain,
+      hostname: "grabakey.org",
       tls_options: [
         verify: :verify_peer,
         depth: 99,
@@ -59,17 +64,11 @@ defmodule Grabakey.Mailer do
       ]
     ]
 
-    send_opts =
-      case hostname do
-        nil -> send_opts
-        _ -> send_opts ++ [hostname: hostname]
-      end
-
     result =
       :gen_smtp_client.send_blocking(
         {
           @mailer,
-          [user.email],
+          [to],
           signed_mail_body
         },
         send_opts

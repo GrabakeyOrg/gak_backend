@@ -27,8 +27,8 @@ defmodule Grabakey.WebServer do
         {:_,
          [
            {'/api/ping', __MODULE__, :ping},
-           {'/api/users', Grabakey.UserApi, {:new, state}},
-           {'/api/users/:id', Grabakey.UserApi, {:id, state}}
+           {'/api/pubkey', Grabakey.PubkeyApi, {:new, state}},
+           {'/api/pubkey/:id', Grabakey.PubkeyApi, {:id, state}}
          ]}
       ])
 

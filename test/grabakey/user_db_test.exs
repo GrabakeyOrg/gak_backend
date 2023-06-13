@@ -1,39 +1,39 @@
-defmodule Grabakey.UserDbTest do
+defmodule Grabakey.PubkeyDbTest do
   use Grabakey.DataCase, async: false
 
   @email "test@grabakey.org"
 
-  test "insert or update user test" do
-    {:ok, user1} = UserDb.create_from_email(@email)
-    {:ok, user2} = UserDb.create_from_email(@email)
-    [user] = Repo.all(User)
-    assert user.pubkey == user1.pubkey
-    assert user.email == user1.email
-    assert user.id == user1.id
-    assert user.token == user2.token
-    assert user.updated_at == user2.updated_at
-    assert user1.token != user2.token
-    assert user1.updated_at != user2.updated_at
+  test "insert or update pubkey test" do
+    {:ok, pubkey1} = PubkeyDb.create_from_email(@email)
+    {:ok, pubkey2} = PubkeyDb.create_from_email(@email)
+    [pubkey] = Repo.all(Pubkey)
+    assert pubkey.data == pubkey1.data
+    assert pubkey.email == pubkey1.email
+    assert pubkey.id == pubkey1.id
+    assert pubkey.token == pubkey2.token
+    assert pubkey.updated_at == pubkey2.updated_at
+    assert pubkey1.token != pubkey2.token
+    assert pubkey1.updated_at != pubkey2.updated_at
   end
 
-  test "update user pubkey test" do
-    {:ok, user1} = UserDb.create_from_email(@email)
-    {:ok, user2} = UserDb.update_pubkey(user1, "UPDATED")
-    user = UserDb.find_by_email(@email)
-    assert user.pubkey == "UPDATED"
-    assert user.token == user2.token
-    assert user.token != user1.token
+  test "update pubkey pubkey test" do
+    {:ok, pubkey1} = PubkeyDb.create_from_email(@email)
+    {:ok, pubkey2} = PubkeyDb.update_pubkey(pubkey1, "UPDATED")
+    pubkey = PubkeyDb.find_by_email(@email)
+    assert pubkey.data == "UPDATED"
+    assert pubkey.token == pubkey2.token
+    assert pubkey.token != pubkey1.token
   end
 
-  test "find user from email test" do
-    {:ok, user} = UserDb.create_from_email(@email)
-    assert user == UserDb.find_by_email(@email)
+  test "find pubkey from email test" do
+    {:ok, pubkey} = PubkeyDb.create_from_email(@email)
+    assert pubkey == PubkeyDb.find_by_email(@email)
   end
 
-  test "find user from id and token test" do
-    {:ok, user} = UserDb.create_from_email(@email)
-    assert [user] == Repo.all(User)
-    assert user == UserDb.find_by_id_and_token(user.id, user.token)
-    assert nil == UserDb.find_by_id_and_token(user.id, "TOKEN")
+  test "find pubkey from id and token test" do
+    {:ok, pubkey} = PubkeyDb.create_from_email(@email)
+    assert [pubkey] == Repo.all(Pubkey)
+    assert pubkey == PubkeyDb.find_by_id_and_token(pubkey.id, pubkey.token)
+    assert nil == PubkeyDb.find_by_id_and_token(pubkey.id, "TOKEN")
   end
 end

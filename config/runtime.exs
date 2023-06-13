@@ -12,7 +12,6 @@ if config_env() == :prod and System.get_env("RELEASE_NAME") != nil do
     server_port: String.to_integer(port),
     mailer_config: [
       baseurl: "https://grabakey.org",
-      hostname: "grabakey.org",
       enabled: System.get_env("GAK_MAILER_ENABLED", "false") |> String.to_atom()
     ]
 end

@@ -29,70 +29,70 @@ defmodule Grabakey.WebServerTest do
     assert :ok == :gun.shutdown(conn_pid)
   end
 
-  test "create user api test" do
+  test "create pubkey api test" do
     port = WebServer.get_port()
     {:ok, conn_pid} = :gun.open('127.0.0.1', port)
     assert_receive {:gun_up, ^conn_pid, :http}
     headers = build_headers(length: String.length(@email))
-    stream_ref = :gun.post(conn_pid, '/api/users', headers, @email)
+    stream_ref = :gun.post(conn_pid, '/api/pubkey', headers, @email)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
-    user = UserDb.find_by_email(@email)
-    assert nil != user.id
-    user = UserDb.find_by_id(user.id)
-    assert @email == user.email
+    pubkey = PubkeyDb.find_by_email(@email)
+    assert nil != pubkey.id
+    pubkey = PubkeyDb.find_by_id(pubkey.id)
+    assert @email == pubkey.email
     assert :ok == :gun.shutdown(conn_pid)
   end
 
-  test "recreate user api test" do
+  test "recreate pubkey api test" do
     port = WebServer.get_port()
     {:ok, conn_pid} = :gun.open('127.0.0.1', port)
     assert_receive {:gun_up, ^conn_pid, :http}
-    {:ok, user0} = UserDb.create_from_email(@email)
+    {:ok, pubkey0} = PubkeyDb.create_from_email(@email)
     headers = build_headers(length: String.length(@email))
-    stream_ref = :gun.post(conn_pid, '/api/users', headers, @email)
+    stream_ref = :gun.post(conn_pid, '/api/pubkey', headers, @email)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
-    user = UserDb.find_by_email(@email)
-    assert nil != user.id
-    user = UserDb.find_by_id(user.id)
-    assert @email == user.email
-    assert user0.id == user.id
-    assert user0.token != user.token
+    pubkey = PubkeyDb.find_by_email(@email)
+    assert nil != pubkey.id
+    pubkey = PubkeyDb.find_by_id(pubkey.id)
+    assert @email == pubkey.email
+    assert pubkey0.id == pubkey.id
+    assert pubkey0.token != pubkey.token
     assert :ok == :gun.shutdown(conn_pid)
   end
 
-  test "delete user api test" do
+  test "delete pubkey api test" do
     port = WebServer.get_port()
     {:ok, conn_pid} = :gun.open('127.0.0.1', port)
     assert_receive {:gun_up, ^conn_pid, :http}
-    {:ok, user} = UserDb.create_from_email(@email)
-    headers = build_headers(token: user.token)
-    stream_ref = :gun.delete(conn_pid, '/api/users/#{user.id}', headers)
+    {:ok, pubkey} = PubkeyDb.create_from_email(@email)
+    headers = build_headers(token: pubkey.token)
+    stream_ref = :gun.delete(conn_pid, '/api/pubkey/#{pubkey.id}', headers)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
-    assert nil == UserDb.find_by_email(@email)
+    assert nil == PubkeyDb.find_by_email(@email)
     assert :ok == :gun.shutdown(conn_pid)
   end
 
-  test "update user pubkey api test" do
+  test "update pubkey pubkey api test" do
     port = WebServer.get_port()
     {:ok, conn_pid} = :gun.open('127.0.0.1', port)
     assert_receive {:gun_up, ^conn_pid, :http}
-    {:ok, user} = UserDb.create_from_email(@email)
-    headers = build_headers(token: user.token)
-    stream_ref = :gun.put(conn_pid, '/api/users/#{user.id}', headers, @pubkey2)
+    {:ok, pubkey} = PubkeyDb.create_from_email(@email)
+    headers = build_headers(token: pubkey.token)
+    stream_ref = :gun.put(conn_pid, '/api/pubkey/#{pubkey.id}', headers, @pubkey2)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
-    user2 = UserDb.find_by_email(@email)
-    assert @pubkey2 == user2.pubkey
-    assert user.token != user2.token
+    pubkey2 = PubkeyDb.find_by_email(@email)
+    assert @pubkey2 == pubkey2.data
+    assert pubkey.token != pubkey2.token
     assert :ok == :gun.shutdown(conn_pid)
   end
 
-  test "get user pubkey api test" do
+  test "get pubkey pubkey api test" do
     port = WebServer.get_port()
     {:ok, conn_pid} = :gun.open('127.0.0.1', port)
     assert_receive {:gun_up, ^conn_pid, :http}
-    {:ok, user} = UserDb.create_from_email(@email)
+    {:ok, pubkey} = PubkeyDb.create_from_email(@email)
     headers = build_headers()
-    stream_ref = :gun.get(conn_pid, '/api/users/#{user.id}', headers)
+    stream_ref = :gun.get(conn_pid, '/api/pubkey/#{pubkey.id}', headers)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
     {:ok, body} = :gun.await_body(conn_pid, stream_ref)
     assert @pubkey1 == body
