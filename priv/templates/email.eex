@@ -1,6 +1,9 @@
+<div style="font-family: 'Courier New', Courier; background-color: white; color: black;">
 You just ran:<br/>
 <br/>
-<b>curl -w "%{http_code}\n" <%= baseurl %>/api/users -d <%= email %></b><br/>
+<div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
+curl -w "%{http_code}\n" <%= baseurl %>/api/users -d <%= email %>
+</div>
 <br/>
 With output:<br/>
 <br/>
@@ -9,20 +12,31 @@ With output:<br/>
 <br/>
 Next possible steps are:<br/>
 <br/>
-# generate an ed25519 ssh key pair<br/>
-<b>ssh-keygen -t ed25519</b><br/>
+<span style="color: ForestGreen;"># generate an ed25519 ssh key pair</span><br/>
+<div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
+ssh-keygen -t ed25519
+</div>
 <br/>
-# upload your ed25519 public key (256 byte size limit)<br/>
-<b>curl -w "%{http_code}\n" <%= baseurl %>/api/users/<%= id %> -X PUT -H "Gak-Token: <%= token %>" -d @$HOME/.ssh/id_ed25519.pub</b><br/>
+<span style="color: ForestGreen;"># upload your ed25519 public key (256 byte size limit)</span><br/>
+<div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
+curl -w "%{http_code}\n" <%= baseurl %>/api/users/<%= id %> -X PUT -H "Gak-Token: <%= token %>" -d @$HOME/.ssh/id_ed25519.pub
+</div>
 <br/>
-# show your current pubkey<br/>
-<b>curl -w "\n%{http_code}\n" <%= baseurl %>/api/users/<%= id %></b><br/>
+<span style="color: ForestGreen;"># show your current pubkey</span><br/>
+<div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
+curl -w "\n%{http_code}\n" <%= baseurl %>/api/users/<%= id %>
+</div>
 <br/>
-# install in your sshd server<br/>
-<b>git clone https://github.com/grabakey/gak_installer.git</b><br/>
-<b>gak_installer/install <%= id %></b><br/>
-<b>rm -fr gak_installer</b><br/>
+<span style="color: ForestGreen;"># install in your sshd server</span><br/>
+<div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
+git clone https://github.com/grabakey/gak_installer.git<br/>
+gak_installer/install <%= id %><br/>
+rm -fr gak_installer
+</div>
 <br/>
-# delete your account<br/>
-<b>curl -w "%{http_code}\n" <%= baseurl %>/api/users/<%= id %> -X DELETE -H "Gak-Token: <%= token %>"</b><br/>
+<span style="color: ForestGreen;"># delete your account</span><br/>
+<div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
+curl -w "%{http_code}\n" <%= baseurl %>/api/users/<%= id %> -X DELETE -H "Gak-Token: <%= token %>"
+</div>
 <br/>
+</div>

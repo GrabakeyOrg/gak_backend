@@ -48,6 +48,13 @@ curl -v localhost:31681/api/users/01H2H215K5A56YBNKVE3E008ST
 curl -v localhost:31681/api/users/01H2H215K5A56YBNKVE3E008ST -X PUT -H "Gak-Token: 01H2H215K5JXZ7HFMT8EA96RHY" -d "UPDATED"
 curl -v localhost:31681/api/users/01H2H215K5A56YBNKVE3E008ST -X PUT -H "Gak-Token: 01H2H215K5JXZ7HFMT8EA96RHY" -d @$HOME/.ssh/id_ed25519.pub
 curl -v localhost:31681/api/users/01H2H215K5A56YBNKVE3E008ST -X DELETE -H "Gak-Token: 01H2H1WV7SMEJR4E19HY7S0J38"
+
+# deploy to grabakey.org
+./grabakey deploy
+
+# run prod release locally
+./grabakey local
+sshuttle -r grabakey.org 0.0.0.0/0
 ```
 
 ## Todo

@@ -32,6 +32,7 @@ defmodule Grabakey.Mailer do
       {:private_key, {:pem_plain, privkey}}
     ]
 
+    # default encoding utf-8 if iconv is present
     signed_mail_body =
       :mimemail.encode(
         {"text", "html",
@@ -39,7 +40,7 @@ defmodule Grabakey.Mailer do
            {"Subject", "Grabakey token and next steps"},
            {"From", "Grabakey Mailer <#{@mailer}>"},
            {"To", user.email}
-         ], %{}, body},
+         ], %{content_type_params: [{"charset", "utf-8"}]}, body},
         dkim: dkim_opts
       )
 
