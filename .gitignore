@@ -31,3 +31,6 @@ grabakey-*.tar
 
 # private keys and environ files
 .secrets
+
+# databases
+.database

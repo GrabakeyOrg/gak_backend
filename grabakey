@@ -20,6 +20,13 @@ case $1 in
     export GAK_DATABASE_PATH=~/rel/grabakey_rel.db 
     tmux new -d -s grabakey ~/rel/grabakey/bin/grabakey start
   ;;
+  local)
+    # sshuttle -r grabakey.org 0.0.0.0/0
+    MIX_ENV=prod mix release --overwrite
+    export GAK_MAILER_ENABLED=true
+    export GAK_DATABASE_PATH=.database/grabakey_rel.db 
+    _build/prod/rel/grabakey/bin/grabakey start
+  ;;
   letsencrypt)
     V2="--server https://acme-v02.api.letsencrypt.org/directory"
     sudo service nginx stop

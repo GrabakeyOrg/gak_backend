@@ -18,5 +18,11 @@ Next possible steps are:<br/>
 # show your current pubkey<br/>
 <b>curl -w "\n%{http_code}\n" <%= baseurl %>/api/users/<%= id %></b><br/>
 <br/>
+# install in your sshd server<br/>
+<b>git clone https://github.com/grabakey/gak_installer.git</b><br/>
+<b>gak_installer/install <%= id %></b><br/>
+<b>rm -fr gak_installer</b><br/>
+<br/>
 # delete your account<br/>
 <b>curl -w "%{http_code}\n" <%= baseurl %>/api/users/<%= id %> -X DELETE -H "Gak-Token: <%= token %>"</b><br/>
+<br/>

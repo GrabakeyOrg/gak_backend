@@ -43,7 +43,7 @@ ssh-keygen -t ed25519
 cat ~/.ssh/id_ed25519.pub
 iex -S mix
 curl -v localhost:31681/api/users -d user@grabakey.org
-sqlite3 grabakey_dev.db "select * from users"
+sqlite3 .database/grabakey_dev.db "select * from users"
 curl -v localhost:31681/api/users/01H2H215K5A56YBNKVE3E008ST
 curl -v localhost:31681/api/users/01H2H215K5A56YBNKVE3E008ST -X PUT -H "Gak-Token: 01H2H215K5JXZ7HFMT8EA96RHY" -d "UPDATED"
 curl -v localhost:31681/api/users/01H2H215K5A56YBNKVE3E008ST -X PUT -H "Gak-Token: 01H2H215K5JXZ7HFMT8EA96RHY" -d @$HOME/.ssh/id_ed25519.pub
@@ -65,8 +65,8 @@ mix ecto.gen.repo -r Grabakey.Repo
 mix ecto.gen.migration create_users
 cd phoenix
 mix ecto.migrate
-sqlite3 grabakey_test.db .schema users
-sqlite3 grabakey_dev.db .schema users
+sqlite3 .database/grabakey_test.db .schema users
+sqlite3 .database/grabakey_dev.db .schema users
 
 # purge and reinstall for port forward to work
 brew install colima docker 
