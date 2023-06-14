@@ -29,7 +29,9 @@ config :grabakey,
   mailer_config: [
     baseurl: "http://localhost:#{port}",
     privkey: File.read!(".secrets/private.pem"),
-    template: EEx.compile_file("priv/templates/create.eex"),
+    create: EEx.compile_file("priv/templates/create.eex"),
+    update: EEx.compile_file("priv/templates/update.eex"),
+    delete: EEx.compile_file("priv/templates/delete.eex"),
     enabled: System.get_env("GAK_MAILER_ENABLED", "false") |> String.to_atom()
   ],
   ecto_repos: [Grabakey.Repo],

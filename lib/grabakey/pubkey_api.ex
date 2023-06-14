@@ -54,7 +54,7 @@ defmodule Grabakey.PubkeyApi do
          {{:ok, pubkey}, email, req} <- {PubkeyDb.create_from_email(email), email, req},
          {pubkey, token, req} <- {PubkeyDb.find_by_email(email), pubkey.token, req},
          {true, pubkey, token, req} <- {pubkey != nil, pubkey, token, req},
-         {{:ok, _res}, req} <- {Mailer.deliver(mailer, pubkey, token), req} do
+         {{:ok, _res}, req} <- {Mailer.send_create(mailer, pubkey, token), req} do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else
@@ -65,7 +65,7 @@ defmodule Grabakey.PubkeyApi do
     end
   end
 
-  def delete_pubkey(req, state) do
+  def delete_pubkey(req, {_, %{mailer: mailer}} = state) do
     id = :cowboy_req.binding(:id, req)
     token = :cowboy_req.header(@token_header, req)
 
@@ -74,7 +74,8 @@ defmodule Grabakey.PubkeyApi do
          {{:ok, _}, req} <- {Ecto.ULID.cast(token), req},
          {pubkey, req} <- {PubkeyDb.find_by_id_and_token(id, token), req},
          {true, pubkey, req} <- {pubkey != nil, pubkey, req},
-         {{:ok, _res}, req} <- {PubkeyDb.delete(pubkey), req} do
+         {{:ok, _res}, req} <- {PubkeyDb.delete(pubkey), req},
+         {{:ok, _res}, req} <- {Mailer.send_delete(mailer, pubkey), req} do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else
@@ -85,7 +86,7 @@ defmodule Grabakey.PubkeyApi do
     end
   end
 
-  def update_pubkey(req, state) do
+  def update_pubkey(req, {_, %{mailer: mailer}} = state) do
     len = :cowboy_req.body_length(req)
     id = :cowboy_req.binding(:id, req)
     token = :cowboy_req.header(@token_header, req)
@@ -99,7 +100,8 @@ defmodule Grabakey.PubkeyApi do
          {true, data, req} <- {valid_pubkey?(data), data, req},
          {pubkey, req} <- {PubkeyDb.find_by_id_and_token(id, token), req},
          {true, pubkey, req} <- {pubkey != nil, pubkey, req},
-         {{:ok, _res}, req} <- {PubkeyDb.update_pubkey(pubkey, data), req} do
+         {{:ok, pubkey}, req} <- {PubkeyDb.update_pubkey(pubkey, data), req},
+         {{:ok, _res}, req} <- {Mailer.send_update(mailer, pubkey), req} do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else

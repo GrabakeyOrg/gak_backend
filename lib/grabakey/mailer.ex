@@ -1,30 +1,53 @@
 defmodule Grabakey.Mailer do
   @mailer "mailer@grabakey.org"
+  @replyto "hello@grabakey.org"
 
-  def deliver(config, pubkey, token) do
+  def send_create(config, pubkey, token) do
     enabled = Keyword.get(config, :enabled, false)
 
     if enabled do
-      eval_and_send(config, pubkey, token)
+      {body, _bindings} = eval_template(config, :create, %{pubkey | token: token})
+      send_sync_mxdns(config, pubkey.email, "Pubkey #{pubkey.id} next steps", body)
     else
       {:ok, :disabled}
     end
   end
 
-  def eval_and_send(config, pubkey, token) do
+  def send_update(config, pubkey) do
+    enabled = Keyword.get(config, :enabled, false)
+
+    if enabled do
+      {body, _bindings} = eval_template(config, :update, pubkey)
+      send_sync_mxdns(config, pubkey.email, "Pubkey #{pubkey.id} next steps", body)
+    else
+      {:ok, :disabled}
+    end
+  end
+
+  def send_delete(config, pubkey) do
+    enabled = Keyword.get(config, :enabled, false)
+
+    if enabled do
+      {body, _bindings} = eval_template(config, :delete, pubkey)
+      send_sync_mxdns(config, pubkey.email, "Pubkey #{pubkey.id} next steps", body)
+    else
+      {:ok, :disabled}
+    end
+  end
+
+  def eval_template(config, template, pubkey) do
     baseurl = Keyword.fetch!(config, :baseurl)
-    template = Keyword.fetch!(config, :template)
+    quoted = Keyword.fetch!(config, template)
 
     bindings = [
-      id: pubkey.id,
-      token: token,
       baseurl: baseurl,
-      email: pubkey.email
+      token: pubkey.token,
+      email: pubkey.email,
+      data: pubkey.data,
+      id: pubkey.id
     ]
 
-    {body, _bindings} = Code.eval_quoted(template, bindings)
-
-    send_sync_mxdns(config, pubkey.email, "Grabakey ID and next steps", body)
+    Code.eval_quoted(quoted, bindings)
   end
 
   def send_sync_mxdns(config, to, subject, body) do
@@ -42,7 +65,8 @@ defmodule Grabakey.Mailer do
         {"text", "html",
          [
            {"Subject", subject},
-           {"From", "Grabakey Mailer <#{@mailer}>"},
+           {"From", "Grabakey <#{@mailer}>"},
+           {"Reply-To", "Grabakey <#{@replyto}>"},
            {"To", to}
          ], %{content_type_params: [{"charset", "utf-8"}]}, body},
         dkim: dkim_opts

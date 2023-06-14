@@ -1,20 +1,11 @@
 <div style="font-family: 'Courier New', Courier; background-color: white; color: black;">
-This is your public key ID:<br/>
+Your public key has been updated to:<br/>
 <br/>
-<b>ID:</b> <%= id %><br/>
-<b>Email:</b> <%= email %><br/>
+<div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
+<%= data %>
+</div>
 <br/>
 Next possible steps are:<br/>
-<br/>
-<span style="color: ForestGreen;"># Generate an ed25519 ssh key pair</span><br/>
-<div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
-ssh-keygen -t ed25519
-</div>
-<br/>
-<span style="color: ForestGreen;"># Upload your ed25519 public key (256 byte size limit)</span><br/>
-<div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
-curl -w "%{http_code}\n" <%= baseurl %>/api/pubkey/<%= id %> -X PUT -H "Gak-Token: <%= token %>" -d @$HOME/.ssh/id_ed25519.pub
-</div>
 <br/>
 <span style="color: ForestGreen;"># Show your current public key</span><br/>
 <div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
@@ -32,6 +23,16 @@ rm -fr gak_installer
 <span style="color: ForestGreen;"># Delete your public key ID (non recoverable)</span><br/>
 <div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
 curl -w "%{http_code}\n" <%= baseurl %>/api/pubkey/<%= id %> -X DELETE -H "Gak-Token: <%= token %>"
+</div>
+<br/>
+<span style="color: ForestGreen;"># Generate an new ed25519 ssh key pair</span><br/>
+<div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
+ssh-keygen -t ed25519
+</div>
+<br/>
+<span style="color: ForestGreen;"># Update your ed25519 public key (256 byte size limit)</span><br/>
+<div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
+curl -w "%{http_code}\n" <%= baseurl %>/api/pubkey/<%= id %> -X PUT -H "Gak-Token: <%= token %>" -d @$HOME/.ssh/id_ed25519.pub
 </div>
 <br/>
 <span style="color: ForestGreen;"># Recover access to your public key</span><br/>
