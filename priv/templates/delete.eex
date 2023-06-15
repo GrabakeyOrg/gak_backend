@@ -9,7 +9,13 @@ curl -w "%{http_code}\n" <%= baseurl %>/api/pubkey -d <%= email %>
 </div>
 <br/>
 We are here for you! 
-<br/><br/>
+<br/>
+<br/>
 Just reply and let us know how we can better serve you.
+<br/>
+<br/>
+https://grabakey.org
+<br/>
+https://github.com/grabakey
 <br/>
 </div>
