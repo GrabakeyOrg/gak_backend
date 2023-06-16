@@ -66,5 +66,11 @@ defmodule Grabakey.PubkeyChangesetTest do
   test "email passes validation" do
     changeset = Pubkey.changeset(%Pubkey{}, %{@empty | email: "a@b.c"})
     assert %{} == errors_on(changeset)
+    changeset = Pubkey.changeset(%Pubkey{}, %{@empty | email: "x.y@b.c"})
+    assert %{} == errors_on(changeset)
+    changeset = Pubkey.changeset(%Pubkey{}, %{@empty | email: "x_y@b.c"})
+    assert %{} == errors_on(changeset)
+    changeset = Pubkey.changeset(%Pubkey{}, %{@empty | email: "x_y.w-z@b.c"})
+    assert %{} == errors_on(changeset)
   end
 end

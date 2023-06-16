@@ -17,7 +17,10 @@ defmodule Grabakey.Pubkey do
     pubkey
     |> cast(attrs, [:email, :data, :token])
     |> validate_required([:email, :data, :token])
-    |> validate_format(:email, ~r/^\S+@\S+(\.\S+)+$/)
+    |> validate_format(
+      :email,
+      ~r/^[-_a-zA-Z0-9]+(\.[-_a-zA-Z0-9]+)*@([-_a-zA-Z0-9]+\.)+[a-zA-Z]+$/
+    )
     |> unique_constraint(:email)
   end
 end
