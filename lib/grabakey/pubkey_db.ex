@@ -41,6 +41,18 @@ defmodule Grabakey.PubkeyDb do
     |> Repo.one()
   end
 
+  def delete_unused_24h() do
+    inserted =
+      DateTime.utc_now()
+      |> DateTime.add(-24, :hour)
+      |> DateTime.to_naive()
+
+    from(pk in Pubkey,
+      where: pk.data == @data and pk.inserted_at < ^inserted
+    )
+    |> Repo.delete_all()
+  end
+
   def delete(pubkey) do
     Repo.delete(pubkey)
   end

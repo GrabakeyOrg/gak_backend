@@ -63,6 +63,10 @@ sshuttle -r grabakey.org 0.0.0.0/0
 # run prod release locally
 ./grabakey local
 sshuttle -r grabakey.org 0.0.0.0/0
+
+# bring production db to dev
+rm .database/grabakey_dev*
+ssh grabakey.org sqlite3 rel/database/grabakey_rel.db ".dump" > sqlite3 .database/grabakey_dev.db
 ```
 
 ## Todo
