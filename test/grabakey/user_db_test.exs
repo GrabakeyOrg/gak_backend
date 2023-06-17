@@ -33,7 +33,30 @@ defmodule Grabakey.PubkeyDbTest do
   test "find pubkey from id and token test" do
     {:ok, pubkey} = PubkeyDb.create_from_email(@email)
     assert [pubkey] == Repo.all(Pubkey)
-    assert pubkey == PubkeyDb.find_by_id_and_token(pubkey.id, pubkey.token)
-    assert nil == PubkeyDb.find_by_id_and_token(pubkey.id, "TOKEN")
+    assert pubkey == PubkeyDb.find_by_id_and_token_5m(pubkey.id, pubkey.token)
+    assert nil == PubkeyDb.find_by_id_and_token_5m(pubkey.id, "TOKEN")
+
+    updated_at =
+      DateTime.utc_now()
+      |> DateTime.add(-4, :minute)
+      |> DateTime.to_naive()
+
+    Pubkey.changeset(pubkey, %{})
+    |> Ecto.Changeset.force_change(:updated_at, updated_at)
+    |> Repo.update()
+
+    assert %{pubkey | updated_at: updated_at} ==
+             PubkeyDb.find_by_id_and_token_5m(pubkey.id, pubkey.token)
+
+    updated_at =
+      DateTime.utc_now()
+      |> DateTime.add(-6, :minute)
+      |> DateTime.to_naive()
+
+    Pubkey.changeset(pubkey, %{})
+    |> Ecto.Changeset.force_change(:updated_at, updated_at)
+    |> Repo.update()
+
+    assert nil == PubkeyDb.find_by_id_and_token_5m(pubkey.id, pubkey.token)
   end
 end

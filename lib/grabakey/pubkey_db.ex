@@ -1,6 +1,7 @@
 defmodule Grabakey.PubkeyDb do
   alias Grabakey.Repo
   alias Grabakey.Pubkey
+  import Ecto.Query
 
   @data "ssh-ed25519 PUBKEY nobody@localhost"
 
@@ -28,8 +29,16 @@ defmodule Grabakey.PubkeyDb do
     Repo.get_by(Pubkey, email: email)
   end
 
-  def find_by_id_and_token(id, token) do
-    Repo.get_by(Pubkey, id: id, token: token)
+  def find_by_id_and_token_5m(id, token) do
+    updated =
+      DateTime.utc_now()
+      |> DateTime.add(-5, :minute)
+      |> DateTime.to_naive()
+
+    from(pk in Pubkey,
+      where: pk.id == ^id and pk.token == ^token and pk.updated_at > ^updated
+    )
+    |> Repo.one()
   end
 
   def delete(pubkey) do

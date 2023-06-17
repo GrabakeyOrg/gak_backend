@@ -39,6 +39,9 @@ curl -w "%{http_code}\n" <%= baseurl %>/api/pubkey/<%= id %> -X DELETE -H "Gak-T
 curl -w "%{http_code}\n" <%= baseurl %>/api/pubkey -d <%= email %>
 </div>
 <br/>
+<b>Notice</b>: Gak-Tokens are only valid for 5 minutes after generation. The execution window for all commands above that use a Gak-Token is 5 minutes from this moment. You can execute a recover access command at any time to get another 5 minute window.
+<br/>
+<br/>
 We are here for you! 
 <br/>
 <br/>

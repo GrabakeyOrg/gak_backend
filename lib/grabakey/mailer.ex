@@ -2,33 +2,23 @@ defmodule Grabakey.Mailer do
   @mailer "mailer@grabakey.org"
   @replyto "hello@grabakey.org"
 
-  def send_create(config, pubkey, token) do
-    enabled = Keyword.get(config, :enabled, false)
-
-    if enabled do
-      {body, _bindings} = eval_template(config, :create, %{pubkey | token: token})
-      send_sync_mxdns(config, pubkey.email, "Pubkey #{pubkey.id} next steps", body)
-    else
-      {:ok, :disabled}
-    end
+  def send_create(config, pubkey) do
+    send_template(config, :create, pubkey)
   end
 
   def send_update(config, pubkey) do
-    enabled = Keyword.get(config, :enabled, false)
-
-    if enabled do
-      {body, _bindings} = eval_template(config, :update, pubkey)
-      send_sync_mxdns(config, pubkey.email, "Pubkey #{pubkey.id} next steps", body)
-    else
-      {:ok, :disabled}
-    end
+    send_template(config, :update, pubkey)
   end
 
   def send_delete(config, pubkey) do
+    send_template(config, :delete, pubkey)
+  end
+
+  def send_template(config, template, pubkey) do
     enabled = Keyword.get(config, :enabled, false)
 
     if enabled do
-      {body, _bindings} = eval_template(config, :delete, pubkey)
+      {body, _bindings} = eval_template(config, template, pubkey)
       send_sync_mxdns(config, pubkey.email, "Pubkey #{pubkey.id} next steps", body)
     else
       {:ok, :disabled}

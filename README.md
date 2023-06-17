@@ -67,7 +67,6 @@ sshuttle -r grabakey.org 0.0.0.0/0
 
 ## Todo
 
-- Entry module
 - Cache headers
 - Purge cron job
 

@@ -43,18 +43,19 @@ defmodule Grabakey.PubkeyApi do
     end
   end
 
+  # how to avoid creation if emailing fails? transactions?
   def create_pubkey(req, {_, %{mailer: mailer}} = state) do
     len = :cowboy_req.body_length(req)
 
     # find_by_email required to fetch the real id on conflict update
     # pubkey.token to get the real updated token even if race condition
-    with {true, req} <- {is_integer(len), req},
-         {true, req} <- {len > 3 and len <= @max_body_len, req},
-         {{:ok, email, req}, _} <- {:cowboy_req.read_body(req), req},
-         {{:ok, pubkey}, email, req} <- {PubkeyDb.create_from_email(email), email, req},
-         {pubkey, token, req} <- {PubkeyDb.find_by_email(email), pubkey.token, req},
-         {true, pubkey, token, req} <- {pubkey != nil, pubkey, token, req},
-         {{:ok, _res}, req} <- {Mailer.send_create(mailer, pubkey, token), req} do
+    with true <- is_integer(len),
+         true <- len > 3 and len <= @max_body_len,
+         {:ok, email, req} <- :cowboy_req.read_body(req),
+         {:ok, pubkey} <- PubkeyDb.create_from_email(email),
+         {pubkey, token} <- {PubkeyDb.find_by_email(email), pubkey.token},
+         {true, pubkey} <- {pubkey != nil, pubkey},
+         {:ok, _res} <- Mailer.send_create(mailer, %{pubkey | token: token}) do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else
@@ -69,13 +70,13 @@ defmodule Grabakey.PubkeyApi do
     id = :cowboy_req.binding(:id, req)
     token = :cowboy_req.header(@token_header, req)
 
-    with {true, req} <- {is_binary(token), req},
-         {{:ok, _}, req} <- {Ecto.ULID.cast(id), req},
-         {{:ok, _}, req} <- {Ecto.ULID.cast(token), req},
-         {pubkey, req} <- {PubkeyDb.find_by_id_and_token(id, token), req},
-         {true, pubkey, req} <- {pubkey != nil, pubkey, req},
-         {{:ok, _res}, req} <- {PubkeyDb.delete(pubkey), req},
-         {{:ok, _res}, req} <- {Mailer.send_delete(mailer, pubkey), req} do
+    with true <- is_binary(token),
+         {:ok, _} <- Ecto.ULID.cast(id),
+         {:ok, _} <- Ecto.ULID.cast(token),
+         pubkey <- PubkeyDb.find_by_id_and_token_5m(id, token),
+         {true, pubkey} <- {pubkey != nil, pubkey},
+         {:ok, _res} <- PubkeyDb.delete(pubkey),
+         {:ok, _res} <- Mailer.send_delete(mailer, pubkey) do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else
@@ -91,17 +92,17 @@ defmodule Grabakey.PubkeyApi do
     id = :cowboy_req.binding(:id, req)
     token = :cowboy_req.header(@token_header, req)
 
-    with {true, req} <- {is_binary(token), req},
-         {{:ok, _}, req} <- {Ecto.ULID.cast(id), req},
-         {{:ok, _}, req} <- {Ecto.ULID.cast(token), req},
-         {true, req} <- {is_integer(len), req},
-         {true, req} <- {len > 0 and len <= @max_body_len, req},
-         {{:ok, data, req}, _} <- {:cowboy_req.read_body(req), req},
-         {true, data, req} <- {valid_pubkey?(data), data, req},
-         {pubkey, req} <- {PubkeyDb.find_by_id_and_token(id, token), req},
-         {true, pubkey, req} <- {pubkey != nil, pubkey, req},
-         {{:ok, pubkey}, req} <- {PubkeyDb.update_pubkey(pubkey, data), req},
-         {{:ok, _res}, req} <- {Mailer.send_update(mailer, pubkey), req} do
+    with true <- is_binary(token),
+         {:ok, _} <- Ecto.ULID.cast(id),
+         {:ok, _} <- Ecto.ULID.cast(token),
+         true <- is_integer(len),
+         true <- len > 0 and len <= @max_body_len,
+         {:ok, data, req} <- :cowboy_req.read_body(req),
+         true <- valid_pubkey?(data),
+         pubkey <- PubkeyDb.find_by_id_and_token_5m(id, token),
+         {true, pubkey} <- {pubkey != nil, pubkey},
+         {:ok, pubkey} <- PubkeyDb.update_pubkey(pubkey, data),
+         {:ok, _res} <- Mailer.send_update(mailer, pubkey) do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else
@@ -115,9 +116,9 @@ defmodule Grabakey.PubkeyApi do
   def get_pubkey(req, state) do
     id = :cowboy_req.binding(:id, req)
 
-    with {{:ok, _}, req} <- {Ecto.ULID.cast(id), req},
-         {pubkey, req} <- {PubkeyDb.find_by_id(id), req},
-         {true, pubkey, req} <- {pubkey != nil, pubkey, req} do
+    with {:ok, _} <- Ecto.ULID.cast(id),
+         pubkey <- PubkeyDb.find_by_id(id),
+         {true, pubkey} <- {pubkey != nil, pubkey} do
       req = :cowboy_req.reply(200, @headers, pubkey.data, req)
       {:ok, req, state}
     else
