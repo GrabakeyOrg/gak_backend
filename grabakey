@@ -1,11 +1,18 @@
 #!/bin/bash -x
 
+OSNAME="$(uname -s)"
+
 # tmux ls
 # tmux detach ctrl+b d
 # tmux a //athach to unique session
 # tmux a -t grabakey
 case $1 in
+  # dev station remote commands
   deploy)
+    if [[ ! "$OSNAME" =~ "Linux" ]]; then
+      echo "Linux required to deploy"
+      exit
+    fi
     MIX_ENV=prod mix release --overwrite
     rsync grabakey grabakey.org:bin/
     ssh grabakey.org bin/grabakey stop 
@@ -13,15 +20,18 @@ case $1 in
     rsync --delete -r _build/prod/rel/grabakey grabakey.org:rel/
     ssh grabakey.org bin/grabakey start 
   ;;
-  stop)
-    ~/rel/grabakey/bin/grabakey stop
+  fetch-backup)
+    rm .database/grabakey_dev.*
+    ssh grabakey.org sqlite3 rel/database/grabakey_rel.db '".backup /tmp/gak-backup.db"'
+    scp grabakey.org:/tmp/gak-backup.db .database/grabakey_dev.db
+    #sqlite3 .database/grabakey_dev.db    
   ;;
-  start)
-    mkdir -p ~/rel/database/
-    export GAK_MAILER_ENABLED=true
-    export GAK_DATABASE_PATH=~/rel/database/grabakey_rel.db 
-    tmux new -d -s grabakey ~/rel/grabakey/bin/grabakey start
+  fetch-dump)
+    rm .database/grabakey_dev.*
+    ssh grabakey.org sqlite3 rel/database/grabakey_rel.db ".dump" | sqlite3 .database/grabakey_dev.db
+    #sqlite3 .database/grabakey_dev.db    
   ;;
+  # dev station local commands
   local)
     # sshuttle -r grabakey.org 0.0.0.0/0
     MIX_ENV=prod mix release --overwrite
@@ -29,12 +39,22 @@ case $1 in
     export GAK_DATABASE_PATH=.database/grabakey_rel.db 
     _build/prod/rel/grabakey/bin/grabakey start
   ;;
+  # server local commands
   letsencrypt)
     V2="--server https://acme-v02.api.letsencrypt.org/directory"
     sudo service nginx stop
     sudo letsencrypt certonly --standalone -d grabakey.org --force-renew $V2
     sudo letsencrypt certonly --standalone -d www.grabakey.org --force-renew $V2
     sudo service nginx start  
+  ;;
+  start)
+    mkdir -p ~/rel/database/
+    export GAK_MAILER_ENABLED=true
+    export GAK_DATABASE_PATH=~/rel/database/grabakey_rel.db 
+    tmux new -d -s grabakey ~/rel/grabakey/bin/grabakey start
+  ;;
+  stop)
+    ~/rel/grabakey/bin/grabakey stop
   ;;
   *)
     ~/rel/grabakey/bin/grabakey "$@"
