@@ -24,7 +24,7 @@ curl -w "\n%{http_code}\n" <%= baseurl %>/api/user/<%= id %>
 <span style="color: ForestGreen;"># Install the openssh plugin</span><br/>
 <div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
 sudo apt install git curl coreutils<br/>
-git clone https://github.com/grabakey/gak_openssh.git<br/>
+git clone https://github.com/GrabakeyOrg/gak_openssh.git<br/>
 gak_openssh/install <%= id %><br/>
 rm -fr gak_openssh
 </div>
@@ -53,6 +53,8 @@ Just reply and let us know how we can better serve you.
 <br/>
 https://grabakey.org
 <br/>
-https://github.com/grabakey
+https://github.com/GrabakeyOrg
+<br/>
+https://www.patreon.com/Grabakey
 <br/>
 </div>
