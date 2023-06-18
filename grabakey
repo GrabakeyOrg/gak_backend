@@ -19,7 +19,7 @@ case $1 in
     ssh grabakey.org bin/grabakey setup 
     # remove old priv files (duplicated migration)
     rsync --delete -r _build/prod/rel/grabakey/ grabakey.org:grabakey/backend
-    ssh grabakey.org bin/grabakey start 
+    ssh grabakey.org bin/grabakey tmux 
   ;;
   fetch-backup)
     rm .database/grabakey_dev.*
@@ -59,10 +59,13 @@ case $1 in
     # select * from users;
     sqlite3 ~/grabakey/database/grabakey_rel.db
   ;;
+  tmux)
+    tmux new -d -s grabakey $0 start
+  ;;
   start)
     export GAK_MAILER_ENABLED=true
     export GAK_DATABASE_PATH=~/grabakey/database/grabakey_rel.db 
-    tmux new -d -s grabakey ~/grabakey/backend/bin/grabakey start
+    ~/grabakey/backend/bin/grabakey start
   ;;
   stop)
     ~/grabakey/backend/bin/grabakey stop
