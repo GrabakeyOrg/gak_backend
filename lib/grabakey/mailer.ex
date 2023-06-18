@@ -19,7 +19,7 @@ defmodule Grabakey.Mailer do
 
     if enabled do
       {body, _bindings} = eval_template(config, template, user)
-      send_sync_mxdns(config, user.email, "User #{user.id} next steps", body)
+      send_sync_mxdns(config, user.email, "ID #{user.id} next steps", body)
     else
       {:ok, :disabled}
     end

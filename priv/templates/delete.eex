@@ -1,9 +1,9 @@
 <div style="font-family: 'Courier New', Courier; background-color: white; color: black;">
-Your public key ID has been deleted.<br/>
+Your account has been deleted.<br/>
 <br/>
 Next possible steps are:<br/>
 <br/>
-<span style="color: ForestGreen;"># Recreate your public key</span><br/>
+<span style="color: ForestGreen;"># Recreate your account</span><br/>
 <div style="border-radius: 0.5em; padding: 0.6em; background-color: silver; color: #404040;">
 curl -w "%{http_code}\n" <%= baseurl %>/api/user -d <%= email %>
 </div>

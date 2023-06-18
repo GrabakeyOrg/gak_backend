@@ -52,6 +52,13 @@ case $1 in
     mkdir -p ~/grabakey/backend/
     mkdir -p ~/grabakey/database/
   ;;
+  sqlite)
+    # bash replaces *
+    # .quite
+    # .schema
+    # select * from users;
+    sqlite3 ~/grabakey/database/grabakey_rel.db
+  ;;
   start)
     export GAK_MAILER_ENABLED=true
     export GAK_DATABASE_PATH=~/grabakey/database/grabakey_rel.db 
