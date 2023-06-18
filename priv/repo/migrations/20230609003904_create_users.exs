@@ -1,8 +1,8 @@
-defmodule Grabakey.Repo.Migrations.CreatePubkeys do
+defmodule Grabakey.Repo.Migrations.CreateUsers do
   use Ecto.Migration
 
   def change do
-    create table(:pubkeys, primary_key: false) do
+    create table(:users, primary_key: false) do
       add(:id, :binary_id, primary_key: true)
       add(:email, :string)
       add(:data, :string)
@@ -11,6 +11,6 @@ defmodule Grabakey.Repo.Migrations.CreatePubkeys do
       timestamps()
     end
 
-    create(unique_index(:pubkeys, [:email]))
+    create(unique_index(:users, [:email]))
   end
 end

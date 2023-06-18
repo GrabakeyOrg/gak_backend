@@ -26,8 +26,8 @@ defmodule Grabakey.DataCase do
       import Grabakey.DataCase
 
       alias Grabakey.WebServer
-      alias Grabakey.PubkeyDb
-      alias Grabakey.Pubkey
+      alias Grabakey.UserDb
+      alias Grabakey.User
     end
   end
 

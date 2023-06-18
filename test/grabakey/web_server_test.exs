@@ -2,8 +2,8 @@ defmodule Grabakey.WebServerTest do
   use Grabakey.DataCase, async: false
 
   @email "test@grabakey.org"
-  @pubkey1 "ssh-ed25519 PUBKEY nobody@localhost"
-  @pubkey2 "ssh-ed25519 UPDATED nobody@localhost"
+  @user1 "ssh-ed25519 PUBKEY nobody@localhost"
+  @user2 "ssh-ed25519 UPDATED nobody@localhost"
   @toms 4000
 
   defp build_headers(opts \\ []) do
@@ -29,75 +29,75 @@ defmodule Grabakey.WebServerTest do
     assert :ok == :gun.shutdown(conn_pid)
   end
 
-  test "create pubkey api test" do
+  test "create user api test" do
     port = WebServer.get_port()
     {:ok, conn_pid} = :gun.open('127.0.0.1', port)
     assert_receive {:gun_up, ^conn_pid, :http}
     headers = build_headers(length: String.length(@email))
-    stream_ref = :gun.post(conn_pid, '/api/pubkey', headers, @email)
+    stream_ref = :gun.post(conn_pid, '/api/user', headers, @email)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
-    pubkey = PubkeyDb.find_by_email(@email)
-    assert nil != pubkey || pubkey.id
-    pubkey = PubkeyDb.find_by_id(pubkey.id)
-    assert @email == pubkey.email
+    user = UserDb.find_by_email(@email)
+    assert nil != user || user.id
+    user = UserDb.find_by_id(user.id)
+    assert @email == user.email
     assert :ok == :gun.shutdown(conn_pid)
   end
 
-  test "recreate pubkey api test" do
+  test "recreate user api test" do
     port = WebServer.get_port()
     {:ok, conn_pid} = :gun.open('127.0.0.1', port)
     assert_receive {:gun_up, ^conn_pid, :http}
-    {:ok, pubkey0} = PubkeyDb.create_from_email(@email)
+    {:ok, user0} = UserDb.create_from_email(@email)
     headers = build_headers(length: String.length(@email))
-    stream_ref = :gun.post(conn_pid, '/api/pubkey', headers, @email)
+    stream_ref = :gun.post(conn_pid, '/api/user', headers, @email)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
-    pubkey = PubkeyDb.find_by_email(@email)
-    assert nil != pubkey || pubkey.id
-    pubkey = PubkeyDb.find_by_id(pubkey.id)
-    assert @email == pubkey.email
-    assert pubkey0.id == pubkey.id
-    assert pubkey0.token != pubkey.token
-    assert pubkey0.updated_at != pubkey.updated_at
-    assert pubkey0.inserted_at == pubkey.inserted_at
+    user = UserDb.find_by_email(@email)
+    assert nil != user || user.id
+    user = UserDb.find_by_id(user.id)
+    assert @email == user.email
+    assert user0.id == user.id
+    assert user0.token != user.token
+    assert user0.updated_at != user.updated_at
+    assert user0.inserted_at == user.inserted_at
     assert :ok == :gun.shutdown(conn_pid)
   end
 
-  test "delete pubkey api test" do
+  test "delete user api test" do
     port = WebServer.get_port()
     {:ok, conn_pid} = :gun.open('127.0.0.1', port)
     assert_receive {:gun_up, ^conn_pid, :http}
-    {:ok, pubkey} = PubkeyDb.create_from_email(@email)
-    headers = build_headers(token: pubkey.token)
-    stream_ref = :gun.delete(conn_pid, '/api/pubkey/#{pubkey.id}', headers)
+    {:ok, user} = UserDb.create_from_email(@email)
+    headers = build_headers(token: user.token)
+    stream_ref = :gun.delete(conn_pid, '/api/user/#{user.id}', headers)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
-    assert nil == PubkeyDb.find_by_email(@email)
+    assert nil == UserDb.find_by_email(@email)
     assert :ok == :gun.shutdown(conn_pid)
   end
 
-  test "update pubkey pubkey api test" do
+  test "update user user api test" do
     port = WebServer.get_port()
     {:ok, conn_pid} = :gun.open('127.0.0.1', port)
     assert_receive {:gun_up, ^conn_pid, :http}
-    {:ok, pubkey} = PubkeyDb.create_from_email(@email)
-    headers = build_headers(token: pubkey.token)
-    stream_ref = :gun.put(conn_pid, '/api/pubkey/#{pubkey.id}', headers, @pubkey2)
+    {:ok, user} = UserDb.create_from_email(@email)
+    headers = build_headers(token: user.token)
+    stream_ref = :gun.put(conn_pid, '/api/user/#{user.id}', headers, @user2)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
-    pubkey2 = PubkeyDb.find_by_email(@email)
-    assert @pubkey2 == pubkey2.data
-    assert pubkey.token != pubkey2.token
+    user2 = UserDb.find_by_email(@email)
+    assert @user2 == user2.data
+    assert user.token != user2.token
     assert :ok == :gun.shutdown(conn_pid)
   end
 
-  test "get pubkey pubkey api test" do
+  test "get user user api test" do
     port = WebServer.get_port()
     {:ok, conn_pid} = :gun.open('127.0.0.1', port)
     assert_receive {:gun_up, ^conn_pid, :http}
-    {:ok, pubkey} = PubkeyDb.create_from_email(@email)
+    {:ok, user} = UserDb.create_from_email(@email)
     headers = build_headers()
-    stream_ref = :gun.get(conn_pid, '/api/pubkey/#{pubkey.id}', headers)
+    stream_ref = :gun.get(conn_pid, '/api/user/#{user.id}', headers)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
     {:ok, body} = :gun.await_body(conn_pid, stream_ref)
-    assert @pubkey1 == body
+    assert @user1 == body
     assert :ok == :gun.shutdown(conn_pid)
   end
 end

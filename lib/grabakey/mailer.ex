@@ -2,39 +2,39 @@ defmodule Grabakey.Mailer do
   @mailer "mailer@grabakey.org"
   @replyto "hello@grabakey.org"
 
-  def send_create(config, pubkey) do
-    send_template(config, :create, pubkey)
+  def send_create(config, user) do
+    send_template(config, :create, user)
   end
 
-  def send_update(config, pubkey) do
-    send_template(config, :update, pubkey)
+  def send_update(config, user) do
+    send_template(config, :update, user)
   end
 
-  def send_delete(config, pubkey) do
-    send_template(config, :delete, pubkey)
+  def send_delete(config, user) do
+    send_template(config, :delete, user)
   end
 
-  def send_template(config, template, pubkey) do
+  def send_template(config, template, user) do
     enabled = Keyword.get(config, :enabled, false)
 
     if enabled do
-      {body, _bindings} = eval_template(config, template, pubkey)
-      send_sync_mxdns(config, pubkey.email, "Pubkey #{pubkey.id} next steps", body)
+      {body, _bindings} = eval_template(config, template, user)
+      send_sync_mxdns(config, user.email, "User #{user.id} next steps", body)
     else
       {:ok, :disabled}
     end
   end
 
-  def eval_template(config, template, pubkey) do
+  def eval_template(config, template, user) do
     baseurl = Keyword.fetch!(config, :baseurl)
     quoted = Keyword.fetch!(config, template)
 
     bindings = [
       baseurl: baseurl,
-      token: pubkey.token,
-      email: pubkey.email,
-      data: pubkey.data,
-      id: pubkey.id
+      token: user.token,
+      email: user.email,
+      data: user.data,
+      id: user.id
     ]
 
     Code.eval_quoted(quoted, bindings)

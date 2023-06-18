@@ -1,11 +1,11 @@
-defmodule Grabakey.Pubkey do
+defmodule Grabakey.User do
   use Ecto.Schema
   import Ecto.Changeset
 
   @timestamps_opts [type: :naive_datetime_usec]
   @primary_key {:id, Ecto.ULID, autogenerate: true}
   @foreign_key_type Ecto.ULID
-  schema "pubkeys" do
+  schema "users" do
     field(:email, :string)
     field(:data, :string)
     field(:token, :string)
@@ -14,8 +14,8 @@ defmodule Grabakey.Pubkey do
   end
 
   @doc false
-  def changeset(pubkey, attrs) do
-    pubkey
+  def changeset(user, attrs) do
+    user
     |> cast(attrs, [:email, :data, :token])
     |> validate_required([:email, :data, :token])
     |> validate_format(

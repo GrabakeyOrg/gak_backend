@@ -8,47 +8,47 @@ MVP
 - curl as client
 - ed25519 only
 - AuthorizedKeysCommand plugin
-- Pubkey: id (uuid), email, data, token
+- User: id (uuid), email, data, token
 
 Use Cases
 
-- Create pubkey: 
+- Create user: 
   - email -> id=new, token=new and send to email 
   - new token created and sent every time
-- Update pubkey: id + data + token -> data=updated, token=new
+- Update user: id + data + token -> data=updated, token=new
 - Install sshd plugin
 - Purge cron
-  - Pubkey with default data after N hours
+  - User with default data after N hours
 
 API
 
-- POST /api/pubkey <- email -> id+token
-- DELETE /api/pubkey/:id <- token
-- PUT /api/pubkey/:id <- token+data
-- GET /api/pubkey/:id -> data
+- POST /api/user <- email -> id+token
+- DELETE /api/user/:id <- token
+- PUT /api/user/:id <- token+data
+- GET /api/user/:id -> data
 
 Errors
 
-- curl -v localhost:31681/api/pubkeyX -d user@grabakey.org
+- curl -v localhost:31681/api/userX -d user@grabakey.org
   - 404 not found
   - 500 No on-conflict found (on docker only)
-- curl -v localhost:31681/api/pubkey/X -X DELETE
-- curl -v localhost:31681/api/pubkey -X POST
+- curl -v localhost:31681/api/user/X -X DELETE
+- curl -v localhost:31681/api/user -X POST
   - 400 bad request (failed validation)
   - 500 internal error (on exception)
-- curl -v localhost:31681/api/pubkey -X DELETE
+- curl -v localhost:31681/api/user -X DELETE
   - 500 internal error (on :stop)
 
 ```bash
 ssh-keygen -t ed25519
 cat ~/.ssh/id_ed25519.pub
 iex -S mix
-curl -v localhost:31681/api/pubkey -d user@grabakey.org
-sqlite3 .database/grabakey_dev.db "select * from pubkeys"
-curl -v localhost:31681/api/pubkey/01H2H215K5A56YBNKVE3E008ST
-curl -v localhost:31681/api/pubkey/01H2H215K5A56YBNKVE3E008ST -X PUT -H "Gak-Token: 01H2H215K5JXZ7HFMT8EA96RHY" -d "UPDATED"
-curl -v localhost:31681/api/pubkey/01H2H215K5A56YBNKVE3E008ST -X PUT -H "Gak-Token: 01H2H215K5JXZ7HFMT8EA96RHY" -d @$HOME/.ssh/id_ed25519.pub
-curl -v localhost:31681/api/pubkey/01H2H215K5A56YBNKVE3E008ST -X DELETE -H "Gak-Token: 01H2H1WV7SMEJR4E19HY7S0J38"
+curl -v localhost:31681/api/user -d user@grabakey.org
+sqlite3 .database/grabakey_dev.db "select * from users"
+curl -v localhost:31681/api/user/01H2H215K5A56YBNKVE3E008ST
+curl -v localhost:31681/api/user/01H2H215K5A56YBNKVE3E008ST -X PUT -H "Gak-Token: 01H2H215K5JXZ7HFMT8EA96RHY" -d "UPDATED"
+curl -v localhost:31681/api/user/01H2H215K5A56YBNKVE3E008ST -X PUT -H "Gak-Token: 01H2H215K5JXZ7HFMT8EA96RHY" -d @$HOME/.ssh/id_ed25519.pub
+curl -v localhost:31681/api/user/01H2H215K5A56YBNKVE3E008ST -X DELETE -H "Gak-Token: 01H2H1WV7SMEJR4E19HY7S0J38"
 
 # deploy to grabakey.org
 ./grabakey deploy
@@ -79,10 +79,10 @@ sshuttle -r grabakey.org 0.0.0.0/0
 mix new gak_backend --module Grabakey --app grabakey --sup
 cd gak_backend
 mix ecto.gen.repo -r Grabakey.Repo
-mix ecto.gen.migration create_pubkeys
+mix ecto.gen.migration create_users
 mix ecto.migrate
-sqlite3 .database/grabakey_test.db ".schema pubkeys"
-sqlite3 .database/grabakey_dev.db ".schema pubkeys"
+sqlite3 .database/grabakey_test.db ".schema users"
+sqlite3 .database/grabakey_dev.db ".schema users"
 
 # purge and reinstall for port forward to work
 brew install colima docker 
@@ -98,11 +98,11 @@ docker run -p 31681:31681 --name grabakey grabakey
 docker run --net=host --name grabakey grabakey
 docker exec -it grabakey /prod/rel/grabakey/bin/grabakey
 docker exec -it grabakey /prod/rel/grabakey/bin/grabakey remote
-docker exec -it grabakey curl -v localhost:31681/api/pubkey -d user@grabakey.org
-docker exec -it grabakey sqlite3 prod/grabakey_rel.db ".schema pubkeys"
-docker exec -it grabakey sqlite3 prod/grabakey_rel.db "select * from pubkeys"
+docker exec -it grabakey curl -v localhost:31681/api/user -d user@grabakey.org
+docker exec -it grabakey sqlite3 prod/grabakey_rel.db ".schema users"
+docker exec -it grabakey sqlite3 prod/grabakey_rel.db "select * from users"
 docker exec -it grabakey /bin/sh
-sqlite3 prod/grabakey_rel.db "select * from pubkeys"
+sqlite3 prod/grabakey_rel.db "select * from users"
 docker rm grabakey
 docker container ls --all
 docker rm -f $(docker ps -a -q)

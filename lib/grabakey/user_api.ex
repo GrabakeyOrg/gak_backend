@@ -1,5 +1,5 @@
-defmodule Grabakey.PubkeyApi do
-  alias Grabakey.PubkeyDb
+defmodule Grabakey.UserApi do
+  alias Grabakey.UserDb
   alias Grabakey.Mailer
 
   @max_body_len 256
@@ -13,7 +13,7 @@ defmodule Grabakey.PubkeyApi do
 
     case method do
       "POST" ->
-        create_pubkey(req, state)
+        create_user(req, state)
 
       _ ->
         fail_delay()
@@ -28,13 +28,13 @@ defmodule Grabakey.PubkeyApi do
 
     case method do
       "GET" ->
-        get_pubkey(req, state)
+        get_user(req, state)
 
       "PUT" ->
-        update_pubkey(req, state)
+        update_user(req, state)
 
       "DELETE" ->
-        delete_pubkey(req, state)
+        delete_user(req, state)
 
       _ ->
         fail_delay()
@@ -44,18 +44,18 @@ defmodule Grabakey.PubkeyApi do
   end
 
   # how to avoid creation if emailing fails? transactions?
-  def create_pubkey(req, {_, %{mailer: mailer}} = state) do
+  def create_user(req, {_, %{mailer: mailer}} = state) do
     len = :cowboy_req.body_length(req)
 
     # find_by_email required to fetch the real id on conflict update
-    # pubkey.token to get the real updated token even if race condition
+    # user.token to get the real updated token even if race condition
     with true <- is_integer(len),
          true <- len > 3 and len <= @max_body_len,
          {:ok, email, req} <- :cowboy_req.read_body(req),
-         {:ok, _} <- PubkeyDb.create_from_email(email),
-         pubkey <- PubkeyDb.find_by_email(email),
-         true <- pubkey != nil,
-         {:ok, _res} <- Mailer.send_create(mailer, pubkey) do
+         {:ok, _} <- UserDb.create_from_email(email),
+         user <- UserDb.find_by_email(email),
+         true <- user != nil,
+         {:ok, _res} <- Mailer.send_create(mailer, user) do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else
@@ -66,17 +66,17 @@ defmodule Grabakey.PubkeyApi do
     end
   end
 
-  def delete_pubkey(req, {_, %{mailer: mailer}} = state) do
+  def delete_user(req, {_, %{mailer: mailer}} = state) do
     id = :cowboy_req.binding(:id, req)
     token = :cowboy_req.header(@token_header, req)
 
     with true <- is_binary(token),
          {:ok, _} <- Ecto.ULID.cast(id),
          {:ok, _} <- Ecto.ULID.cast(token),
-         pubkey <- PubkeyDb.find_by_id_and_token_5m(id, token),
-         true <- pubkey != nil,
-         {:ok, _res} <- PubkeyDb.delete(pubkey),
-         {:ok, _res} <- Mailer.send_delete(mailer, pubkey) do
+         user <- UserDb.find_by_id_and_token_5m(id, token),
+         true <- user != nil,
+         {:ok, _res} <- UserDb.delete(user),
+         {:ok, _res} <- Mailer.send_delete(mailer, user) do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else
@@ -87,7 +87,7 @@ defmodule Grabakey.PubkeyApi do
     end
   end
 
-  def update_pubkey(req, {_, %{mailer: mailer}} = state) do
+  def update_user(req, {_, %{mailer: mailer}} = state) do
     len = :cowboy_req.body_length(req)
     id = :cowboy_req.binding(:id, req)
     token = :cowboy_req.header(@token_header, req)
@@ -98,11 +98,11 @@ defmodule Grabakey.PubkeyApi do
          true <- is_integer(len),
          true <- len > 0 and len <= @max_body_len,
          {:ok, data, req} <- :cowboy_req.read_body(req),
-         true <- valid_pubkey?(data),
-         pubkey <- PubkeyDb.find_by_id_and_token_5m(id, token),
-         true <- pubkey != nil,
-         {:ok, pubkey} <- PubkeyDb.update_pubkey(pubkey, data),
-         {:ok, _res} <- Mailer.send_update(mailer, pubkey) do
+         true <- valid_user?(data),
+         user <- UserDb.find_by_id_and_token_5m(id, token),
+         true <- user != nil,
+         {:ok, user} <- UserDb.update_user(user, data),
+         {:ok, _res} <- Mailer.send_update(mailer, user) do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else
@@ -113,13 +113,13 @@ defmodule Grabakey.PubkeyApi do
     end
   end
 
-  def get_pubkey(req, state) do
+  def get_user(req, state) do
     id = :cowboy_req.binding(:id, req)
 
     with {:ok, _} <- Ecto.ULID.cast(id),
-         pubkey <- PubkeyDb.find_by_id(id),
-         true <- pubkey != nil do
-      req = :cowboy_req.reply(200, @headers, pubkey.data, req)
+         user <- UserDb.find_by_id(id),
+         true <- user != nil do
+      req = :cowboy_req.reply(200, @headers, user.data, req)
       {:ok, req, state}
     else
       _res ->
@@ -142,7 +142,7 @@ defmodule Grabakey.PubkeyApi do
     :timer.sleep(@fail_delay)
   end
 
-  defp valid_pubkey?(data) do
+  defp valid_user?(data) do
     case String.split(data, " ") do
       ["ssh-ed25519", _, _] -> true
       _ -> false

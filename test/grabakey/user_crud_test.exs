@@ -1,61 +1,61 @@
-defmodule Grabakey.PubkeyCrudTest do
+defmodule Grabakey.UserCrudTest do
   use Grabakey.DataCase, async: false
 
   @empty %{email: nil, data: "PUBKEY", token: "TOKEN"}
 
-  test "pubkey crud test" do
-    pubkey = Pubkey.changeset(%Pubkey{}, %{@empty | email: "test@grabakey.org"})
-    assert {:ok, %Pubkey{} = pubkey} = Repo.insert(pubkey)
-    assert 26 == String.length(pubkey.id)
-    assert pubkey.email == "test@grabakey.org"
-    assert pubkey.data == "PUBKEY"
-    assert pubkey.token == "TOKEN"
-    assert [%Pubkey{} = pubkey] = Repo.all(Pubkey)
-    assert 26 == String.length(pubkey.id)
-    assert pubkey.email == "test@grabakey.org"
-    assert pubkey.data == "PUBKEY"
-    assert pubkey.token == "TOKEN"
-    assert pubkey = Repo.get(Pubkey, pubkey.id)
-    assert 26 == String.length(pubkey.id)
-    assert pubkey.email == "test@grabakey.org"
-    assert pubkey.data == "PUBKEY"
-    assert pubkey.token == "TOKEN"
-    assert pubkey = Repo.get_by(Pubkey, id: pubkey.id)
-    assert 26 == String.length(pubkey.id)
-    assert pubkey.email == "test@grabakey.org"
-    assert pubkey.data == "PUBKEY"
-    assert pubkey.token == "TOKEN"
-    assert pubkey = Repo.get_by(Pubkey, email: pubkey.email)
-    assert 26 == String.length(pubkey.id)
-    assert pubkey.data == "PUBKEY"
-    assert pubkey.token == "TOKEN"
+  test "user crud test" do
+    user = User.changeset(%User{}, %{@empty | email: "test@grabakey.org"})
+    assert {:ok, %User{} = user} = Repo.insert(user)
+    assert 26 == String.length(user.id)
+    assert user.email == "test@grabakey.org"
+    assert user.data == "PUBKEY"
+    assert user.token == "TOKEN"
+    assert [%User{} = user] = Repo.all(User)
+    assert 26 == String.length(user.id)
+    assert user.email == "test@grabakey.org"
+    assert user.data == "PUBKEY"
+    assert user.token == "TOKEN"
+    assert user = Repo.get(User, user.id)
+    assert 26 == String.length(user.id)
+    assert user.email == "test@grabakey.org"
+    assert user.data == "PUBKEY"
+    assert user.token == "TOKEN"
+    assert user = Repo.get_by(User, id: user.id)
+    assert 26 == String.length(user.id)
+    assert user.email == "test@grabakey.org"
+    assert user.data == "PUBKEY"
+    assert user.token == "TOKEN"
+    assert user = Repo.get_by(User, email: user.email)
+    assert 26 == String.length(user.id)
+    assert user.data == "PUBKEY"
+    assert user.token == "TOKEN"
   end
 
-  test "pubkey unique test" do
-    changeset = Pubkey.changeset(%Pubkey{}, %{@empty | email: "test@grabakey.org"})
-    assert {:ok, %Pubkey{} = pubkey} = Repo.insert(changeset)
-    assert 26 == String.length(pubkey.id)
-    assert pubkey.email == "test@grabakey.org"
-    assert pubkey.data == "PUBKEY"
-    assert pubkey.token == "TOKEN"
-    changeset = Pubkey.changeset(pubkey, %{})
+  test "user unique test" do
+    changeset = User.changeset(%User{}, %{@empty | email: "test@grabakey.org"})
+    assert {:ok, %User{} = user} = Repo.insert(changeset)
+    assert 26 == String.length(user.id)
+    assert user.email == "test@grabakey.org"
+    assert user.data == "PUBKEY"
+    assert user.token == "TOKEN"
+    changeset = User.changeset(user, %{})
     assert {:error, %Ecto.Changeset{} = result} = Repo.insert(changeset)
 
     assert result.errors == [
              email:
                {"has already been taken",
-                [constraint: :unique, constraint_name: "pubkeys_email_index"]}
+                [constraint: :unique, constraint_name: "users_email_index"]}
            ]
   end
 
-  test "pubkey delete test" do
-    changeset = Pubkey.changeset(%Pubkey{}, %{@empty | email: "test@grabakey.org"})
-    assert {:ok, %Pubkey{} = pubkey} = Repo.insert(changeset)
-    assert 26 == String.length(pubkey.id)
-    assert pubkey.email == "test@grabakey.org"
-    assert pubkey.data == "PUBKEY"
-    assert pubkey.token == "TOKEN"
-    Repo.delete_all(Pubkey)
-    assert [] = Repo.all(Pubkey)
+  test "user delete test" do
+    changeset = User.changeset(%User{}, %{@empty | email: "test@grabakey.org"})
+    assert {:ok, %User{} = user} = Repo.insert(changeset)
+    assert 26 == String.length(user.id)
+    assert user.email == "test@grabakey.org"
+    assert user.data == "PUBKEY"
+    assert user.token == "TOKEN"
+    Repo.delete_all(User)
+    assert [] = Repo.all(User)
   end
 end

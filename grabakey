@@ -25,12 +25,12 @@ case $1 in
     rm .database/grabakey_dev.*
     ssh grabakey.org sqlite3 grabakey/database/grabakey_rel.db '".backup /tmp/gak-backup.db"'
     scp grabakey.org:/tmp/gak-backup.db .database/grabakey_dev.db
-    #sqlite3 .database/grabakey_dev.db "select * from pubkeys"
+    #sqlite3 .database/grabakey_dev.db "select * from users"
   ;;
   fetch-dump)
     rm .database/grabakey_dev.*
     ssh grabakey.org sqlite3 grabakey/database/grabakey_rel.db ".dump" | sqlite3 .database/grabakey_dev.db
-    #sqlite3 .database/grabakey_dev.db "select * from pubkeys"
+    #sqlite3 .database/grabakey_dev.db "select * from users"
   ;;
   # dev station local commands
   local)

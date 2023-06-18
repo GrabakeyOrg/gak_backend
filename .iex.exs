@@ -1,5 +1,5 @@
 alias Grabakey.Repo
 alias Grabakey.WebServer
-alias Grabakey.PubkeyDb
+alias Grabakey.UserDb
 alias Grabakey.Mailer
-alias Grabakey.Pubkey
+alias Grabakey.User

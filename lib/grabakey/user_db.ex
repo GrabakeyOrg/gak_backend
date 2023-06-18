@@ -1,6 +1,6 @@
-defmodule Grabakey.PubkeyDb do
+defmodule Grabakey.UserDb do
   alias Grabakey.Repo
-  alias Grabakey.Pubkey
+  alias Grabakey.User
   import Ecto.Query
 
   @data "ssh-ed25519 PUBKEY nobody@localhost"
@@ -8,25 +8,25 @@ defmodule Grabakey.PubkeyDb do
   def create_from_email(email) do
     token = Ecto.ULID.generate()
 
-    %Pubkey{}
-    |> Pubkey.changeset(%{email: email, token: token, data: @data})
+    %User{}
+    |> User.changeset(%{email: email, token: token, data: @data})
     |> Repo.insert(conflict_target: :email, on_conflict: {:replace, [:token, :updated_at]})
   end
 
-  def update_pubkey(pubkey, data) do
+  def update_user(user, data) do
     token = Ecto.ULID.generate()
 
-    pubkey
-    |> Pubkey.changeset(%{token: token, data: data})
+    user
+    |> User.changeset(%{token: token, data: data})
     |> Repo.update()
   end
 
   def find_by_id(id) do
-    Repo.get_by(Pubkey, id: id)
+    Repo.get_by(User, id: id)
   end
 
   def find_by_email(email) do
-    Repo.get_by(Pubkey, email: email)
+    Repo.get_by(User, email: email)
   end
 
   def find_by_id_and_token_5m(id, token) do
@@ -35,7 +35,7 @@ defmodule Grabakey.PubkeyDb do
       |> DateTime.add(-5, :minute)
       |> DateTime.to_naive()
 
-    from(pk in Pubkey,
+    from(pk in User,
       where: pk.id == ^id and pk.token == ^token and pk.updated_at > ^updated
     )
     |> Repo.one()
@@ -47,13 +47,13 @@ defmodule Grabakey.PubkeyDb do
       |> DateTime.add(-24, :hour)
       |> DateTime.to_naive()
 
-    from(pk in Pubkey,
+    from(pk in User,
       where: pk.data == @data and pk.inserted_at < ^inserted
     )
     |> Repo.delete_all()
   end
 
-  def delete(pubkey) do
-    Repo.delete(pubkey)
+  def delete(user) do
+    Repo.delete(user)
   end
 end
