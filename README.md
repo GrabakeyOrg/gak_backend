@@ -76,10 +76,10 @@ sshuttle -r grabakey.org 0.0.0.0/0
 ## Howto
 
 ```bash
-mix new backend --module Grabakey --app grabakey --sup
+mix new gak_backend --module Grabakey --app grabakey --sup
+cd gak_backend
 mix ecto.gen.repo -r Grabakey.Repo
 mix ecto.gen.migration create_pubkeys
-cd phoenix
 mix ecto.migrate
 sqlite3 .database/grabakey_test.db ".schema pubkeys"
 sqlite3 .database/grabakey_dev.db ".schema pubkeys"
