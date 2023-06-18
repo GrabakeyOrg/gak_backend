@@ -52,10 +52,10 @@ defmodule Grabakey.PubkeyApi do
     with true <- is_integer(len),
          true <- len > 3 and len <= @max_body_len,
          {:ok, email, req} <- :cowboy_req.read_body(req),
-         {:ok, pubkey} <- PubkeyDb.create_from_email(email),
-         {pubkey, token} <- {PubkeyDb.find_by_email(email), pubkey.token},
-         {true, pubkey} <- {pubkey != nil, pubkey},
-         {:ok, _res} <- Mailer.send_create(mailer, %{pubkey | token: token}) do
+         {:ok, _} <- PubkeyDb.create_from_email(email),
+         pubkey <- PubkeyDb.find_by_email(email),
+         true <- pubkey != nil,
+         {:ok, _res} <- Mailer.send_create(mailer, pubkey) do
       req = :cowboy_req.reply(200, @headers, req)
       {:ok, req, state}
     else
@@ -74,7 +74,7 @@ defmodule Grabakey.PubkeyApi do
          {:ok, _} <- Ecto.ULID.cast(id),
          {:ok, _} <- Ecto.ULID.cast(token),
          pubkey <- PubkeyDb.find_by_id_and_token_5m(id, token),
-         {true, pubkey} <- {pubkey != nil, pubkey},
+         true <- pubkey != nil,
          {:ok, _res} <- PubkeyDb.delete(pubkey),
          {:ok, _res} <- Mailer.send_delete(mailer, pubkey) do
       req = :cowboy_req.reply(200, @headers, req)
@@ -100,7 +100,7 @@ defmodule Grabakey.PubkeyApi do
          {:ok, data, req} <- :cowboy_req.read_body(req),
          true <- valid_pubkey?(data),
          pubkey <- PubkeyDb.find_by_id_and_token_5m(id, token),
-         {true, pubkey} <- {pubkey != nil, pubkey},
+         true <- pubkey != nil,
          {:ok, pubkey} <- PubkeyDb.update_pubkey(pubkey, data),
          {:ok, _res} <- Mailer.send_update(mailer, pubkey) do
       req = :cowboy_req.reply(200, @headers, req)
@@ -118,7 +118,7 @@ defmodule Grabakey.PubkeyApi do
 
     with {:ok, _} <- Ecto.ULID.cast(id),
          pubkey <- PubkeyDb.find_by_id(id),
-         {true, pubkey} <- {pubkey != nil, pubkey} do
+         true <- pubkey != nil do
       req = :cowboy_req.reply(200, @headers, pubkey.data, req)
       {:ok, req, state}
     else

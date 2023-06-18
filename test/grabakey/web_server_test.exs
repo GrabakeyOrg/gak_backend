@@ -37,7 +37,7 @@ defmodule Grabakey.WebServerTest do
     stream_ref = :gun.post(conn_pid, '/api/pubkey', headers, @email)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
     pubkey = PubkeyDb.find_by_email(@email)
-    assert nil != pubkey.id
+    assert nil != pubkey || pubkey.id
     pubkey = PubkeyDb.find_by_id(pubkey.id)
     assert @email == pubkey.email
     assert :ok == :gun.shutdown(conn_pid)
@@ -52,11 +52,13 @@ defmodule Grabakey.WebServerTest do
     stream_ref = :gun.post(conn_pid, '/api/pubkey', headers, @email)
     assert_receive {:gun_response, ^conn_pid, ^stream_ref, _, 200, _}, @toms
     pubkey = PubkeyDb.find_by_email(@email)
-    assert nil != pubkey.id
+    assert nil != pubkey || pubkey.id
     pubkey = PubkeyDb.find_by_id(pubkey.id)
     assert @email == pubkey.email
     assert pubkey0.id == pubkey.id
     assert pubkey0.token != pubkey.token
+    assert pubkey0.updated_at != pubkey.updated_at
+    assert pubkey0.inserted_at == pubkey.inserted_at
     assert :ok == :gun.shutdown(conn_pid)
   end
 
