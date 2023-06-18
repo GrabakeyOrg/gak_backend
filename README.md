@@ -65,8 +65,7 @@ sshuttle -r grabakey.org 0.0.0.0/0
 sshuttle -r grabakey.org 0.0.0.0/0
 
 # bring production db to dev
-rm .database/grabakey_dev*
-ssh grabakey.org sqlite3 rel/database/grabakey_rel.db ".dump" > sqlite3 .database/grabakey_dev.db
+./grabakey fetch-backup
 ```
 
 ## Todo

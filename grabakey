@@ -16,20 +16,21 @@ case $1 in
     MIX_ENV=prod mix release --overwrite
     rsync grabakey grabakey.org:bin/
     ssh grabakey.org bin/grabakey stop 
+    ssh grabakey.org bin/grabakey setup 
     # remove old priv files (duplicated migration)
-    rsync --delete -r _build/prod/rel/grabakey grabakey.org:rel/
+    rsync --delete -r _build/prod/rel/grabakey/ grabakey.org:grabakey/backend
     ssh grabakey.org bin/grabakey start 
   ;;
   fetch-backup)
     rm .database/grabakey_dev.*
-    ssh grabakey.org sqlite3 rel/database/grabakey_rel.db '".backup /tmp/gak-backup.db"'
+    ssh grabakey.org sqlite3 grabakey/database/grabakey_rel.db '".backup /tmp/gak-backup.db"'
     scp grabakey.org:/tmp/gak-backup.db .database/grabakey_dev.db
-    #sqlite3 .database/grabakey_dev.db    
+    #sqlite3 .database/grabakey_dev.db "select * from pubkeys"
   ;;
   fetch-dump)
     rm .database/grabakey_dev.*
-    ssh grabakey.org sqlite3 rel/database/grabakey_rel.db ".dump" | sqlite3 .database/grabakey_dev.db
-    #sqlite3 .database/grabakey_dev.db    
+    ssh grabakey.org sqlite3 grabakey/database/grabakey_rel.db ".dump" | sqlite3 .database/grabakey_dev.db
+    #sqlite3 .database/grabakey_dev.db "select * from pubkeys"
   ;;
   # dev station local commands
   local)
@@ -47,16 +48,19 @@ case $1 in
     sudo letsencrypt certonly --standalone -d www.grabakey.org --force-renew $V2
     sudo service nginx start  
   ;;
+  setup)
+    mkdir -p ~/grabakey/backend/
+    mkdir -p ~/grabakey/database/
+  ;;
   start)
-    mkdir -p ~/rel/database/
     export GAK_MAILER_ENABLED=true
-    export GAK_DATABASE_PATH=~/rel/database/grabakey_rel.db 
-    tmux new -d -s grabakey ~/rel/grabakey/bin/grabakey start
+    export GAK_DATABASE_PATH=~/grabakey/database/grabakey_rel.db 
+    tmux new -d -s grabakey ~/grabakey/backend/bin/grabakey start
   ;;
   stop)
-    ~/rel/grabakey/bin/grabakey stop
+    ~/grabakey/backend/bin/grabakey stop
   ;;
   *)
-    ~/rel/grabakey/bin/grabakey "$@"
+    ~/grabakey/backend/bin/grabakey "$@"
   ;;
 esac
