@@ -83,32 +83,6 @@ mix ecto.gen.migration create_users
 mix ecto.migrate
 sqlite3 .database/grabakey_test.db ".schema users"
 sqlite3 .database/grabakey_dev.db ".schema users"
-
-# purge and reinstall for port forward to work
-brew install colima docker 
-colima start --network-address
-colima stop --force
-colima delete --force
-docker ps -a
-
-docker build -t grabakey .
-docker image ls
-docker image rm ImageID
-docker run -p 31681:31681 --name grabakey grabakey
-docker run --net=host --name grabakey grabakey
-docker exec -it grabakey /prod/rel/grabakey/bin/grabakey
-docker exec -it grabakey /prod/rel/grabakey/bin/grabakey remote
-docker exec -it grabakey curl -v localhost:31681/api/user -d user@grabakey.org
-docker exec -it grabakey sqlite3 prod/grabakey_rel.db ".schema users"
-docker exec -it grabakey sqlite3 prod/grabakey_rel.db "select * from users"
-docker exec -it grabakey /bin/sh
-sqlite3 prod/grabakey_rel.db "select * from users"
-docker rm grabakey
-docker container ls --all
-docker rm -f $(docker ps -a -q)
-docker image rm -f $(docker image ls -q)
-docker port grabakey
-docker ps
 ```
 
 ## Future
